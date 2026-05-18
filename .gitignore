@@ -1,0 +1,30 @@
+# Next.js
+.next/
+out/
+
+# Dependencies
+node_modules/
+
+# Environment — contains RPC credentials, never commit
+.env
+.env.local
+.env.*.local
+
+# Build output
+build/
+
+# pnpm
+.pnpm-store/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
