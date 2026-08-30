@@ -52,6 +52,7 @@ const CoinFlowNodeComponent = ({
     selected,
 }: NodeProps<{ nodeData: CoinFlowNode; onSelect: () => void }>) => {
     const getNodeColor = (node: CoinFlowNode): string => {
+        if (node.isAggregate) return '#94a3b8';
         if (node.isStarting) return '#3b82f6';
         if (node.wallet?.isOwnWallet) return '#8b5cf6';
         if (node.wallet?.method?.includes(ClusteringMethod.KNOWN_POOL)) return '#06b6d4';
@@ -99,8 +100,9 @@ const CoinFlowNodeComponent = ({
                     style={{ backgroundColor: color }}
                 />
                 <div className="text-xs font-medium text-gray-600">
-                    {nodeData.isStarting && 'Start'}
-                    {nodeData.wallet?.isOwnWallet && 'Your Wallet'}
+                    {nodeData.isAggregate && 'Collapsed'}
+                    {!nodeData.isAggregate && nodeData.isStarting && 'Start'}
+                    {!nodeData.isAggregate && nodeData.wallet?.isOwnWallet && 'Your Wallet'}
                     {nodeData.wallet?.serviceName &&
                         !nodeData.isStarting &&
                         !nodeData.wallet?.isOwnWallet &&
@@ -114,7 +116,8 @@ const CoinFlowNodeComponent = ({
                         !nodeData.wallet?.isOwnWallet &&
                         !nodeData.wallet?.serviceName &&
                         'UTXO'}
-                    {!nodeData.isStarting &&
+                    {!nodeData.isAggregate &&
+                        !nodeData.isStarting &&
                         !nodeData.isUnspent &&
                         !nodeData.wallet?.isOwnWallet &&
                         !nodeData.wallet?.serviceName &&

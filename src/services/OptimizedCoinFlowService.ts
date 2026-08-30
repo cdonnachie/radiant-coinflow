@@ -175,17 +175,34 @@ export class OptimizedCoinFlowService {
             visitedTxIds.add(spendingTx.hash);
             graph.transactionCount++;
 
+            // Collect candidate outputs (those passing identity + dust filters),
+            // then keep only the top-N by value and fold the rest into a single
+            // aggregate node. Radiant exchange/pool/token txs fan out to dozens
+            // of outputs; capping bounds the graph width. Doing this before the
+            // per-output isOutputUnspent RPC also saves those calls.
+            const candidates: Array<{
+                index: number;
+                identity: NonNullable<ReturnType<OptimizedCoinFlowService['extractOutputIdentity']>>;
+                amount: bigint;
+            }> = [];
             for (let i = 0; i < spendingTx.vout.length; i++) {
                 const output = spendingTx.vout[i];
                 const identity = this.extractOutputIdentity(output);
-                const outputAmount = output.valueSat;
-
                 if (!identity) continue;
                 // Token/contract outputs carry dust-level RXD by design —
                 // never dust-filter them or token flows disappear.
                 const isTokenLike = identity.hasRefs || identity.isContract;
-                if (!options.includeDust && !isTokenLike && outputAmount <= BigInt(options.dustThreshold)) continue;
+                if (!options.includeDust && !isTokenLike && output.valueSat <= BigInt(options.dustThreshold)) continue;
+                candidates.push({ index: i, identity, amount: output.valueSat });
+            }
 
+            candidates.sort((a, b) => (b.amount > a.amount ? 1 : b.amount < a.amount ? -1 : 0));
+            const shown = candidates.slice(0, options.maxOutputsPerTx);
+            const collapsed = candidates.slice(options.maxOutputsPerTx);
+            const edgeHeight = (spentInfo.height ?? spendingTx.height) || undefined;
+            const edgeTime = spendingTx.blocktime ? new Date(spendingTx.blocktime * 1000) : undefined;
+
+            for (const { index: i, identity, amount: outputAmount } of shown) {
                 const isUnspent = await this.apiService.isOutputUnspent(spendingTx.hash, i);
                 this.requestCount++;
 
@@ -195,7 +212,7 @@ export class OptimizedCoinFlowService {
                     vout: i,
                     address: identity.address,
                     amount: outputAmount,
-                    blockHeight: (spentInfo.height ?? spendingTx.height) || undefined,
+                    blockHeight: edgeHeight,
                     confirmations: spendingTx.confirmations,
                     isUnspent,
                     depth: currentDepth + 1,
@@ -204,36 +221,51 @@ export class OptimizedCoinFlowService {
                 };
 
                 graph.nodes.push(outputNode);
-
-                const edge: CoinFlowEdge = {
+                graph.edges.push({
                     id: `${currentNode.id}->${outputNode.id}`,
                     from: currentNode.id,
                     to: outputNode.id,
                     txid: spendingTx.hash,
                     amount: outputAmount,
-                    blockHeight: (spentInfo.height ?? spendingTx.height) || undefined,
-                    timestamp: spendingTx.blocktime
-                        ? new Date(spendingTx.blocktime * 1000)
-                        : undefined,
-                };
-
-                graph.edges.push(edge);
-                graph.metadata.actualMaxDepth = Math.max(
-                    graph.metadata.actualMaxDepth,
-                    currentDepth + 1,
-                );
+                    blockHeight: edgeHeight,
+                    timestamp: edgeTime,
+                });
+                graph.metadata.actualMaxDepth = Math.max(graph.metadata.actualMaxDepth, currentDepth + 1);
 
                 if (options.stopAtExchanges && this.knownExchanges.has(identity.address)) continue;
 
                 if (!isUnspent) {
-                    await this.traceFlowOptimized(
-                        graph,
-                        outputNode,
-                        options,
-                        visitedTxIds,
-                        currentDepth + 1,
-                    );
+                    await this.traceFlowOptimized(graph, outputNode, options, visitedTxIds, currentDepth + 1);
                 }
+            }
+
+            if (collapsed.length > 0) {
+                const collapsedTotal = collapsed.reduce((sum, c) => sum + c.amount, 0n);
+                const aggId = `${currentNode.id}->agg:${spendingTx.hash}`;
+                const aggNode: CoinFlowNode = {
+                    id: aggId,
+                    txid: spendingTx.hash,
+                    vout: -1,
+                    address: `+${collapsed.length} more outputs`,
+                    amount: collapsedTotal,
+                    blockHeight: edgeHeight,
+                    confirmations: spendingTx.confirmations,
+                    isUnspent: false,
+                    depth: currentDepth + 1,
+                    isAggregate: true,
+                    aggregateCount: collapsed.length,
+                };
+                graph.nodes.push(aggNode);
+                graph.edges.push({
+                    id: `${currentNode.id}->${aggId}`,
+                    from: currentNode.id,
+                    to: aggId,
+                    txid: spendingTx.hash,
+                    amount: collapsedTotal,
+                    blockHeight: edgeHeight,
+                    timestamp: edgeTime,
+                });
+                graph.metadata.actualMaxDepth = Math.max(graph.metadata.actualMaxDepth, currentDepth + 1);
             }
         } catch (error) {
             graph.metadata.errors.push(`Error tracing from ${currentNode.id}: ${error}`);
@@ -395,8 +427,20 @@ export class OptimizedCoinFlowService {
                 byAddress.set(info.sourceAddress, group);
             }
 
-            for (const [sourceAddress, infos] of byAddress) {
-                const totalAmount = infos.reduce((sum, i) => sum + i.sourceOutput.valueSat, 0n);
+            // Rank source addresses by contributed value; show the top-N and
+            // fold the remaining smaller sources into one aggregate node, so a
+            // consolidation pulling from dozens of addresses stays readable.
+            const groups = [...byAddress.entries()]
+                .map(([addr, infos]) => ({
+                    addr,
+                    infos,
+                    total: infos.reduce((sum, i) => sum + i.sourceOutput.valueSat, 0n),
+                }))
+                .sort((a, b) => (b.total > a.total ? 1 : b.total < a.total ? -1 : 0));
+            const shownGroups = groups.slice(0, options.maxOutputsPerTx);
+            const collapsedGroups = groups.slice(options.maxOutputsPerTx);
+
+            for (const { addr: sourceAddress, infos, total: totalAmount } of shownGroups) {
                 // Representative: largest by value — its txid drives further recursion
                 const best = infos.reduce((a, b) =>
                     a.sourceOutput.valueSat >= b.sourceOutput.valueSat ? a : b
@@ -442,6 +486,39 @@ export class OptimizedCoinFlowService {
                 if (options.stopAtExchanges && this.knownExchanges.has(sourceAddress)) continue;
 
                 await this.traceBackwardsOptimized(graph, sourceNode, options, visitedTxIds, currentDepth + 1);
+            }
+
+            if (collapsedGroups.length > 0) {
+                const collapsedTotal = collapsedGroups.reduce((sum, g) => sum + g.total, 0n);
+                const aggId = `agg-src:${creatingTx.hash}`;
+                if (!graph.nodes.find((n) => n.id === aggId)) {
+                    graph.nodes.push({
+                        id: aggId,
+                        txid: creatingTx.hash,
+                        vout: -1,
+                        address: `+${collapsedGroups.length} more sources`,
+                        amount: collapsedTotal,
+                        blockHeight: creatingTx.height || undefined,
+                        confirmations: creatingTx.confirmations,
+                        isUnspent: false,
+                        depth: currentDepth + 1,
+                        isAggregate: true,
+                        aggregateCount: collapsedGroups.length,
+                    });
+                }
+                const aggEdgeId = `${aggId}->${currentNode.id}`;
+                if (!graph.edges.find((e) => e.id === aggEdgeId)) {
+                    graph.edges.push({
+                        id: aggEdgeId,
+                        from: aggId,
+                        to: currentNode.id,
+                        txid: creatingTx.hash,
+                        amount: collapsedTotal,
+                        blockHeight: creatingTx.height || undefined,
+                        timestamp: creatingTx.blocktime ? new Date(creatingTx.blocktime * 1000) : undefined,
+                    });
+                }
+                graph.metadata.actualMaxDepth = Math.max(graph.metadata.actualMaxDepth, currentDepth + 1);
             }
         } catch (error) {
             graph.metadata.errors.push(`Error tracing back from ${currentNode.id}: ${error}`);
@@ -563,6 +640,7 @@ export class OptimizedCoinFlowService {
                 stopAtExchanges: false,
                 timeoutMs: 60000,
                 direction: 'backward',
+                maxOutputsPerTx: 8,
                 ...options,
             };
         }
@@ -593,6 +671,7 @@ export class OptimizedCoinFlowService {
             stopAtExchanges: requestedDepth >= 8,
             timeoutMs,
             direction: 'forward',
+            maxOutputsPerTx: 8,
             ...options,
         };
     }
@@ -620,7 +699,8 @@ export class OptimizedCoinFlowService {
 
         const finalDestinations = graph.nodes
             .filter(
-                (n) => n.isUnspent || graph.edges.filter((e) => e.from === n.id).length === 0,
+                (n) => !n.isAggregate &&
+                    (n.isUnspent || graph.edges.filter((e) => e.from === n.id).length === 0),
             )
             .map((n) => ({
                 address: n.address,

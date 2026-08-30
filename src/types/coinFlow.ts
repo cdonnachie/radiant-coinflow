@@ -34,6 +34,10 @@ export interface CoinFlowNode {
     hasRefs?: boolean;
     /** Pure contract output with no owner address (identified by scripthash) */
     isContract?: boolean;
+    /** Aggregate node collapsing N small sibling outputs/sources (not traced further) */
+    isAggregate?: boolean;
+    /** Number of outputs/sources folded into this aggregate node */
+    aggregateCount?: number;
 }
 
 export interface CoinFlowEdge {
@@ -145,6 +149,9 @@ export interface CoinFlowOptions {
     timeoutMs?: number;
     /** Trace direction: forward (where coins went) or backward (where coins came from) */
     direction?: 'forward' | 'backward';
+    /** Max sibling outputs/sources shown per transaction before collapsing the
+     *  rest into a single "+N more" aggregate node (default 8). Bounds graph width. */
+    maxOutputsPerTx?: number;
 }
 
 export interface CoinFlowAnalysisResult {
