@@ -162,13 +162,14 @@ async function main() {
         data.exchanges ??= {};
         const entry = data.exchanges[mergeName] ?? { name: mergeName, confidence: 0.95, addresses: [] };
         const before = new Set(entry.addresses);
-        for (const a of cluster) if (!before.has(a)) entry.addresses.push(a);
+        const added = cluster.filter((a) => !before.has(a));
+        entry.addresses.push(...added);
         entry.confidence = Math.max(entry.confidence ?? 0, 0.95);
         entry.source = `${entry.source ? entry.source + '; ' : ''}common-input expansion from verified withdrawal (${new Date().toISOString().slice(0, 10)})`;
         data.exchanges[mergeName] = entry;
         data.lastUpdated = new Date().toISOString();
         writeFileSync(OUT_PATH, JSON.stringify(data, null, 2) + '\n');
-        console.log(`\nMerged ${cluster.length - before.size} new address(es) into exchanges["${mergeName}"] (${entry.addresses.length} total).`);
+        console.log(`\nMerged ${added.length} new address(es) into exchanges["${mergeName}"] (${entry.addresses.length} total).`);
     }
 }
 

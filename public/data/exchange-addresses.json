@@ -1,16 +1,17 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-08-30T15:59:37.413Z",
+  "lastUpdated": "2026-08-30T23:01:47.998Z",
   "_comment": "Known Radiant (RXD) entity addresses. Populate with exchange deposit/hot wallets, mining pool payout addresses, and service addresses as they are identified.",
   "exchanges": {
     "CoinEx": {
       "name": "CoinEx",
       "link": "https://www.coinex.com/",
-      "confidence": 0.7,
+      "confidence": 0.95,
       "addresses": [
+        "15mpU1khxUuuAVHRq8DJRNaP2pW8dghZF5",
         "147x8VCuUDLn7EgbKPN8GY6k46EKqoPoGa"
       ],
-      "source": "user-reported, unverified; cold-wallet profile (90M RXD single UTXO, 22 lifetime txs as of 2026-08)"
+      "source": "Hot wallet 15mpU1kh… (#3 rich list, ~1B RXD) confirmed via verified withdrawal tx 286d46f… (2026-08-30), consistent across older tx ab561f6…. Cluster not yet expanded — address too busy for ElectrumX (needs radiantd address index). Cold wallet 147x8VC… (90M RXD) user-reported, not yet on-chain linked to the hot wallet."
     },
     "MEXC": {
       "name": "MEXC",
