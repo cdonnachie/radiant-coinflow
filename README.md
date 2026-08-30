@@ -98,6 +98,21 @@ pnpm scan-pools -- --blocks 50000  # deeper history
 pnpm scan-pools -- --dry-run       # preview without writing
 ```
 
+### Identifying exchange wallets
+
+Given one verified withdrawal transaction (exchange → user), the sending
+addresses on its inputs are the exchange's hot wallet. `expand-cluster.mjs`
+seeds from that transaction and grows the operator's address set via the
+common-input heuristic:
+
+```bash
+node scripts/expand-cluster.mjs --from-tx <withdrawal-txid> --merge <ExchangeName>
+node scripts/expand-cluster.mjs 1SomeSeedAddress --hops 4 --max-addrs 500
+```
+
+`--merge NAME` unions the result into `exchanges[NAME]` at 0.95 confidence.
+Run each exchange separately so clusters never bleed together.
+
 ## Systemd service
 
 See [`radiant-coinflow.service`](radiant-coinflow.service) for a ready-to-use unit file.
