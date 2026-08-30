@@ -1,7 +1,7 @@
 {
-  "name": "avian-coinflow",
+  "name": "radiant-coinflow",
   "version": "1.0.0",
-  "description": "Standalone Avian CoinFlow Explorer — public tool for tracing coin movement on the Avian blockchain",
+  "description": "Standalone Radiant CoinFlow Explorer — public tool for tracing coin movement on the Radiant blockchain",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

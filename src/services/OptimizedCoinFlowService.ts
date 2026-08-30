@@ -1,12 +1,13 @@
 /**
  * Optimized Coin Flow Service
  *
- * Analyzes coin movement on the Avian blockchain via your local Avian Core node.
- * Uses getspentinfo (spentindex=1) to directly resolve spending transactions —
- * no address history scanning needed.
+ * Analyzes coin movement on the Radiant blockchain. Talks to the chain
+ * exclusively through ChainDataService, so it is agnostic to whether the
+ * server answers from a patched radiantd (spentindex) or from ElectrumX.
  */
 
-import { AvianRpcService, AvianTransaction } from './AvianRpcService';
+import { RadiantChainService } from './RadiantChainService';
+import type { ChainDataService } from './ChainDataService';
 import type {
     CoinFlowGraph,
     CoinFlowNode,
@@ -20,7 +21,7 @@ import type {
 import { ClusteringMethod } from '@/types/coinFlow';
 
 export class OptimizedCoinFlowService {
-    private apiService: AvianRpcService;
+    private apiService: ChainDataService;
     private addressLabels: Map<string, AddressLabel> = new Map();
     private knownExchanges: Map<string, { name: string; confidence: number; type: 'exchange' | 'pool' | 'service' }> = new Map();
     private requestCount: number = 0;
@@ -28,7 +29,7 @@ export class OptimizedCoinFlowService {
     private initPromise: Promise<void> | null = null;
 
     constructor() {
-        this.apiService = new AvianRpcService();
+        this.apiService = new RadiantChainService();
     }
 
     private ensureInitialized(): Promise<void> {
@@ -178,7 +179,7 @@ export class OptimizedCoinFlowService {
                 const outputAmount = output.valueSat;
 
                 if (!outputAddress) continue;
-                if (!options.includeDust && outputAmount <= options.dustThreshold) continue;
+                if (!options.includeDust && outputAmount <= BigInt(options.dustThreshold)) continue;
 
                 const isUnspent = await this.apiService.isOutputUnspent(spendingTx.hash, i);
                 this.requestCount++;
@@ -290,8 +291,8 @@ export class OptimizedCoinFlowService {
         // user actually cares about when tracing backward.
         const totalInflow = graph.edges
             .filter((e) => e.to === startingNode.id)
-            .reduce((sum, e) => sum + e.amount, 0);
-        if (totalInflow > 0) {
+            .reduce((sum, e) => sum + e.amount, 0n);
+        if (totalInflow > 0n) {
             startingNode.amount = totalInflow;
             graph.startingUtxo.amount = totalInflow;
         }
@@ -364,7 +365,7 @@ export class OptimizedCoinFlowService {
                 const sourceAddress = this.extractAddress(sourceOutput);
                 if (!sourceAddress) continue;
                 if (options.confirmedOnly && sourceTx.confirmations < options.minConfirmations) continue;
-                if (!options.includeDust && sourceOutput.valueSat <= options.dustThreshold) continue;
+                if (!options.includeDust && sourceOutput.valueSat <= BigInt(options.dustThreshold)) continue;
                 vinInfos.push({ vin, sourceTx, sourceOutput, sourceAddress });
             }
 
@@ -377,7 +378,7 @@ export class OptimizedCoinFlowService {
             }
 
             for (const [sourceAddress, infos] of byAddress) {
-                const totalAmount = infos.reduce((sum, i) => sum + i.sourceOutput.valueSat, 0);
+                const totalAmount = infos.reduce((sum, i) => sum + i.sourceOutput.valueSat, 0n);
                 // Representative: largest by value — its txid drives further recursion
                 const best = infos.reduce((a, b) =>
                     a.sourceOutput.valueSat >= b.sourceOutput.valueSat ? a : b
@@ -560,17 +561,18 @@ export class OptimizedCoinFlowService {
         const totalAmount = graph.startingUtxo.amount;
         const unspentAmount = graph.nodes
             .filter((n) => n.isUnspent)
-            .reduce((sum, n) => sum + n.amount, 0);
+            .reduce((sum, n) => sum + n.amount, 0n);
 
         const walletDistribution = graph.walletClusters.map((wallet) => {
             const walletAmount = graph.nodes
                 .filter((n) => n.wallet?.id === wallet.id)
-                .reduce((sum, n) => sum + n.amount, 0);
+                .reduce((sum, n) => sum + n.amount, 0n);
             return {
                 walletId: wallet.id,
                 walletName: wallet.name,
                 amount: walletAmount,
-                percentage: (walletAmount / totalAmount) * 100,
+                // Ratio via Number is fine — percentages are display-only
+                percentage: totalAmount === 0n ? 0 : (Number(walletAmount) / Number(totalAmount)) * 100,
             };
         });
 
@@ -634,9 +636,7 @@ export class OptimizedCoinFlowService {
                 }
             }
         } catch {
-            // Fallback to hardcoded addresses if file cannot be fetched
-            this.knownExchanges.set('RJWkuMKEXxkJTW9fjHjhAJucattmifADFP', { name: 'XeggeX', confidence: 0.9, type: 'exchange' });
-            this.knownExchanges.set('REqnCtn1CeCDQji1BA4ezWtNTopBo6jjhh', { name: 'TradeOgre', confidence: 0.9, type: 'exchange' });
+            // No fallback list — analysis proceeds without known-entity labels
         }
     }
 

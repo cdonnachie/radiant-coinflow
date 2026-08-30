@@ -25,17 +25,17 @@ export default function HomePage() {
                 <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                     Trace and visualize where coins go on the{' '}
                     <a
-                        href="https://avn.network"
+                        href="https://radiantblockchain.org"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-primary hover:underline"
                     >
-                        Avian Network
+                        Radiant Blockchain
                     </a>
                     . Follow the money from any UTXO through the entire transaction graph.
                 </p>
                 <div className="flex items-center justify-center gap-3 flex-wrap">
-                    <Badge variant="secondary">Avian (AVN) Blockchain</Badge>
+                    <Badge variant="secondary">Radiant (RXD) Blockchain</Badge>
                     <Badge variant="secondary">Interactive Graph Visualization</Badge>
                     <Badge variant="secondary">Wallet Clustering</Badge>
                     <Badge variant="secondary">Exchange Detection</Badge>
@@ -70,7 +70,7 @@ export default function HomePage() {
                             <div>
                                 <strong>Analysis Runs</strong>
                                 <p className="text-muted-foreground mt-1">
-                                    Traces forward (where coins went) or backward (where they came from) up to your configured depth, querying your Avian node via RPC.
+                                    Traces forward (where coins went) or backward (where they came from) up to your configured depth, querying your Radiant node or ElectrumX server.
                                 </p>
                             </div>
                         </div>

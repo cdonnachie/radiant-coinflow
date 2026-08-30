@@ -14,8 +14,8 @@ export interface CoinFlowNode {
     vout: number;
     /** Output address */
     address: string;
-    /** Amount in satoshis */
-    amount: number;
+    /** Amount in photons (bigint — RXD amounts can exceed 2^53) */
+    amount: bigint;
     /** Block height when this output was created */
     blockHeight?: number;
     /** Number of confirmations */
@@ -41,8 +41,8 @@ export interface CoinFlowEdge {
     to: string;
     /** Transaction that created this flow */
     txid: string;
-    /** Amount transferred in satoshis */
-    amount: number;
+    /** Amount transferred in photons (bigint) */
+    amount: bigint;
     /** Block height of the transaction */
     blockHeight?: number;
     /** Transaction fee (for the entire transaction) */
@@ -97,7 +97,7 @@ export interface CoinFlowGraph {
         txid: string;
         vout: number;
         address: string;
-        amount: number;
+        amount: bigint;
     };
     /** Maximum depth traced */
     maxDepth: number;
@@ -157,23 +157,23 @@ export interface CoinFlowSummary {
     totalAddresses: number;
     /** Total number of transactions traced */
     totalTransactions: number;
-    /** Total amount that flowed from the starting UTXO */
-    totalAmount: number;
-    /** Amount still unspent (final UTXOs) */
-    unspentAmount: number;
+    /** Total amount that flowed from the starting UTXO (photons) */
+    totalAmount: bigint;
+    /** Amount still unspent (final UTXOs, photons) */
+    unspentAmount: bigint;
     /** Estimated number of distinct wallets */
     estimatedWallets: number;
     /** Percentage of funds that went to each estimated wallet */
     walletDistribution: Array<{
         walletId: string;
         walletName: string;
-        amount: number;
+        amount: bigint;
         percentage: number;
     }>;
     /** Final destination breakdown */
     finalDestinations: Array<{
         address: string;
-        amount: number;
+        amount: bigint;
         isUnspent: boolean;
         estimatedWallet?: string;
     }>;

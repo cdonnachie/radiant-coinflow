@@ -9,24 +9,6 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        avian: {
-          '50': '#e6fbfa',
-          '100': '#c5f7f4',
-          '200': '#94f0eb',
-          '300': '#5ae3dc',
-          '400': '#2dd4cd',
-          '500': '#14b8b2',
-          '600': '#0a9993',
-          '700': '#0b7b77',
-          '800': '#0e6360',
-          '900': '#105352',
-          '950': '#03302f',
-          primary: '#23c9c1',
-          secondary: '#0a7f8c',
-          accent: '#1a9691',
-          dark: '#06595a',
-          light: '#4cecdf',
-        },
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: {

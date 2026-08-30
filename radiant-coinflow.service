@@ -1,0 +1,41 @@
+[Unit]
+Description=CoinFlow Explorer — Radiant Blockchain
+Documentation=https://github.com/cdonnachie/radiant-coinflow
+After=network.target
+
+[Service]
+Type=simple
+User=coinflow
+Group=coinflow
+WorkingDirectory=/opt/radiant-coinflow
+
+# Environment — edit these or point to a separate env file
+Environment=NODE_ENV=production
+Environment=PORT=3000
+# EnvironmentFile=/opt/radiant-coinflow/.env.local
+
+# Chain backend — ElectrumX (put secrets in .env.local via EnvironmentFile
+# above instead of here so they are not world-readable)
+Environment=RADIANT_BACKEND=electrumx
+Environment=RADIANT_ELECTRUM_HOST=127.0.0.1
+Environment=RADIANT_ELECTRUM_PORT=50010
+Environment=RADIANT_ELECTRUM_TLS=false
+
+# Or the native RPC backend, once radiantd carries address/spent index patches:
+# Environment=RADIANT_BACKEND=rpc
+# Environment=RADIANT_RPC_URL=http://127.0.0.1:7332
+# Environment=RADIANT_RPC_USER=rpcuser
+# Environment=RADIANT_RPC_PASS=rpcpassword
+
+ExecStart=/usr/bin/node node_modules/.bin/next start --port 3000
+Restart=on-failure
+RestartSec=5
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/radiant-coinflow/.next/cache
+
+[Install]
+WantedBy=multi-user.target

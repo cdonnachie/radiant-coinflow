@@ -8,20 +8,20 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-    title: 'CoinFlow Explorer — Avian Network',
+    title: 'CoinFlow Explorer — Radiant Blockchain',
     description:
-        'Trace and visualize coin flow on the Avian (AVN) blockchain. Analyze transaction outputs, track fund movements, and explore wallet clusters.',
-    keywords: ['Avian', 'AVN', 'blockchain', 'coin flow', 'transaction analysis', 'UTXO', 'crypto explorer'],
+        'Trace and visualize coin flow on the Radiant (RXD) blockchain. Analyze transaction outputs, track fund movements, and explore wallet clusters.',
+    keywords: ['Radiant', 'RXD', 'blockchain', 'coin flow', 'transaction analysis', 'UTXO', 'crypto explorer'],
     icons: {
         icon: [
-            { url: '/avian.ico', sizes: 'any' },
-            { url: '/avian.png', type: 'image/png' },
+            { url: '/radiant.ico', sizes: 'any' },
+            { url: '/radiant.png', type: 'image/png' },
         ],
-        apple: '/avian.png',
+        apple: '/radiant.png',
     },
     openGraph: {
-        title: 'CoinFlow Explorer — Avian Network',
-        description: 'Trace and visualize coin flow on the Avian (AVN) blockchain.',
+        title: 'CoinFlow Explorer — Radiant Blockchain',
+        description: 'Trace and visualize coin flow on the Radiant (RXD) blockchain.',
         type: 'website',
     },
 };
@@ -29,7 +29,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
     themeColor: [
         { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-        { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
+        { media: '(prefers-color-scheme: dark)', color: '#25252C' },
     ],
 };
 
@@ -46,16 +46,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                                 <p>
                                     CoinFlow Explorer •{' '}
                                     <a
-                                        href="https://avn.network"
+                                        href="https://radiantblockchain.org"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="hover:text-foreground underline underline-offset-4"
                                     >
-                                        Avian Network
+                                        Radiant Blockchain
                                     </a>
                                     {' • '}
                                     <a
-                                        href="https://flightpath.avn.network"
+                                        href="https://radiantexplorer.com"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="hover:text-foreground underline underline-offset-4"

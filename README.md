@@ -1,6 +1,6 @@
-# CoinFlow Explorer — Avian Network
+# CoinFlow Explorer — Radiant Blockchain
 
-A self-hosted web tool for tracing and visualising coin movement on the [Avian (AVN)](https://avn.network) blockchain. Connect it to your own Avian Core full node and explore transaction graphs, wallet clusters, and exchange/pool activity.
+A self-hosted web tool for tracing and visualising coin movement on the [Radiant (RXD)](https://radiantblockchain.org) blockchain. Connect it to an ElectrumX server or your own Radiant full node and explore transaction graphs, wallet clusters, and exchange/pool activity.
 
 ## Features
 
@@ -15,32 +15,40 @@ A self-hosted web tool for tracing and visualising coin movement on the [Avian (
 ## Requirements
 
 - Node.js 20+ and [pnpm](https://pnpm.io)
-- An Avian Core full node with the following flags enabled:
-
-```
-txindex=1
-addressindex=1
-spentindex=1
-timestampindex=1
-```
+- One of two chain data backends:
+  - **ElectrumX** (works today) — any Radiant ElectrumX server
+  - **Native RPC** — a radiantd build carrying the address/spent index patches, with
+    `txindex=1`, `addressindex=1`, `spentindex=1` enabled
 
 ## Setup
 
 ```bash
-git clone https://github.com/AvianNetwork/avian-coinflow
-cd avian-coinflow
 pnpm install
 ```
 
-Create `.env.local` in the project root:
+Create `.env.local` in the project root (see `.env.local.example`).
+
+For the ElectrumX backend:
 
 ```env
-AVIAN_RPC_URL=http://127.0.0.1:7896
-AVIAN_RPC_USER=your_rpc_username
-AVIAN_RPC_PASS=your_rpc_password
+RADIANT_BACKEND=electrumx
+RADIANT_ELECTRUM_HOST=127.0.0.1
+RADIANT_ELECTRUM_PORT=50010
+RADIANT_ELECTRUM_TLS=false
 ```
 
-These credentials must match the `rpcuser` / `rpcpassword` in your `avian.conf`.
+For the native RPC backend (radiantd with index patches):
+
+```env
+RADIANT_BACKEND=rpc
+RADIANT_RPC_URL=http://127.0.0.1:7332
+RADIANT_RPC_USER=your_rpc_username
+RADIANT_RPC_PASS=your_rpc_password
+```
+
+RPC credentials must match the `rpcuser` / `rpcpassword` in your `radiant.conf`.
+Both backends serve identical response shapes, so switching between them is
+purely a configuration change.
 
 ## Development
 
@@ -65,12 +73,12 @@ Known addresses are read from `public/data/exchange-addresses.json` at startup. 
 ```json
 {
   "version": 1,
-  "lastUpdated": "2025-01-01",
+  "lastUpdated": "2026-01-01",
   "exchanges": {
-    "XeggeX": { "name": "XeggeX", "confidence": 0.95, "addresses": ["R..."] }
+    "CoinEx": { "name": "CoinEx", "confidence": 0.95, "addresses": ["1..."] }
   },
   "mining_pools": {
-    "Blockminerz": { "name": "Blockminerz", "confidence": 0.9, "addresses": ["R..."] }
+    "ExamplePool": { "name": "ExamplePool", "confidence": 0.9, "addresses": ["1..."] }
   },
   "services": {}
 }
@@ -78,7 +86,7 @@ Known addresses are read from `public/data/exchange-addresses.json` at startup. 
 
 ## Systemd service
 
-See [`avian-coinflow.service`](avian-coinflow.service) for a ready-to-use unit file.
+See [`radiant-coinflow.service`](radiant-coinflow.service) for a ready-to-use unit file.
 
 ## Tech stack
 
@@ -89,4 +97,4 @@ See [`avian-coinflow.service`](avian-coinflow.service) for a ready-to-use unit f
 | Graph | ReactFlow + Dagre layout |
 | Export | html-to-image + jsPDF |
 | Theming | next-themes |
-| RPC | Avian Core JSON-RPC (proxied via `/api/rpc`) |
+| Chain data | ElectrumX or Radiant Core JSON-RPC (proxied via `/api/rpc`) |

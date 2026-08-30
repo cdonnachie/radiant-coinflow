@@ -1,4 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getChainBackend } from '@/server/backends';
+import { BackendRpcError } from '@/server/backends/ChainBackend';
+import { stringifyWithBigInts } from '@/server/jsonBigInt';
+
+// The ElectrumX backend keeps a persistent TCP socket — needs the Node runtime.
+export const runtime = 'nodejs';
 
 const ALLOWED_METHODS = new Set([
     'getrawtransaction',
@@ -12,17 +18,6 @@ const ALLOWED_METHODS = new Set([
 ]);
 
 export async function POST(request: NextRequest) {
-    const rpcUrl = process.env.AVIAN_RPC_URL;
-    const rpcUser = process.env.AVIAN_RPC_USER;
-    const rpcPass = process.env.AVIAN_RPC_PASS;
-
-    if (!rpcUrl || !rpcUser || !rpcPass) {
-        return NextResponse.json(
-            { error: 'RPC not configured. Set AVIAN_RPC_URL, AVIAN_RPC_USER, AVIAN_RPC_PASS in .env.local' },
-            { status: 503 },
-        );
-    }
-
     let method: string;
     let params: unknown[];
 
@@ -38,34 +33,24 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: `Method not allowed: ${method}` }, { status: 403 });
     }
 
-    const auth = Buffer.from(`${rpcUser}:${rpcPass}`).toString('base64');
-
     try {
-        const response = await fetch(rpcUrl, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                Authorization: `Basic ${auth}`,
-            },
-            body: JSON.stringify({
-                jsonrpc: '1.0',
-                id: 'coinflow',
-                method,
-                params,
-            }),
+        const backend = getChainBackend();
+        const result = await backend.call(method, params);
+        // Amounts beyond 2^53 arrive from backends as bigints; serialize them
+        // as exact decimal strings (the client's toPhotons accepts both).
+        return new NextResponse(stringifyWithBigInts({ result }), {
+            headers: { 'Content-Type': 'application/json' },
         });
-
-        const data = await response.json();
-
-        if (data.error) {
-            return NextResponse.json({ error: data.error }, { status: 400 });
-        }
-
-        return NextResponse.json({ result: data.result });
     } catch (error) {
-        console.error('RPC call failed:', error);
+        if (error instanceof BackendRpcError) {
+            return NextResponse.json(
+                { error: { message: error.message, code: error.code } },
+                { status: 400 },
+            );
+        }
+        console.error(`Chain backend call failed (${method}):`, error);
         return NextResponse.json(
-            { error: `Failed to reach Avian node: ${error instanceof Error ? error.message : 'Unknown error'}` },
+            { error: error instanceof Error ? error.message : 'Unknown backend error' },
             { status: 502 },
         );
     }

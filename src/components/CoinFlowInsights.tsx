@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatRxd } from '@/lib/amounts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -137,8 +138,8 @@ export default function CoinFlowInsights({ analysis, onExplorePattern }: CoinFlo
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                         <div className="text-center p-4 bg-muted/50 rounded-lg">
                             <DollarSign className="w-6 h-6 mx-auto mb-2 text-green-600" />
-                            <div className="text-2xl font-bold">{(totalValue / 100000000).toFixed(4)}</div>
-                            <div className="text-sm text-muted-foreground">Total AVN Tracked</div>
+                            <div className="text-2xl font-bold">{formatRxd(totalValue, 4)}</div>
+                            <div className="text-sm text-muted-foreground">Total RXD Tracked</div>
                         </div>
                         <div className="text-center p-4 bg-muted/50 rounded-lg">
                             <Target className="w-6 h-6 mx-auto mb-2 text-blue-600" />

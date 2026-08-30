@@ -27,7 +27,9 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { OptimizedCoinFlowService } from '@/services/OptimizedCoinFlowService';
-import { AvianRpcService, type AddressUtxo } from '@/services/AvianRpcService';
+import { RadiantChainService } from '@/services/RadiantChainService';
+import type { AddressUtxo } from '@/services/ChainDataService';
+import { formatRxd } from '@/lib/amounts';
 import { CoinFlowGraphVisualization } from '@/components/CoinFlowGraph';
 import type {
     CoinFlowAnalysisResult,
@@ -46,7 +48,7 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
 }) => {
     const coinFlowService = useMemo(() => new OptimizedCoinFlowService(), []);
 
-    const rpcService = useMemo(() => new AvianRpcService(), []);
+    const rpcService = useMemo(() => new RadiantChainService(), []);
 
     const [txid, setTxid] = useState(initialTxid);
     const [vout, setVout] = useState(initialVout);
@@ -202,7 +204,7 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
         });
     }, [coinFlowService]);
 
-    const formatAmount = (amount: number): string => (amount / 100000000).toFixed(8) + ' AVN';
+    const formatAmount = (amount: bigint): string => formatRxd(amount) + ' RXD';
 
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
@@ -255,7 +257,7 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
                                     value={addressInput}
                                     onChange={(e) => { setAddressInput(e.target.value); setAddressUtxos(null); setHasMoreUtxos(false); setUtxoOffset(0); }}
                                     onKeyDown={(e) => e.key === 'Enter' && handleAddressLookup()}
-                                    placeholder="Enter AVN address (e.g. RTji...)"
+                                    placeholder="Enter RXD address (e.g. 1MBm...)"
                                     disabled={isAnalyzing || isLookingUp}
                                     className="font-mono flex-1"
                                 />
@@ -298,7 +300,7 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
                                                             </span>
                                                             <div className="flex items-center gap-2 shrink-0">
                                                                 <span className="text-xs font-medium">
-                                                                    {(utxo.satoshis / 1e8).toFixed(4)} AVN
+                                                                    {formatRxd(utxo.satoshis, 4)} RXD
                                                                 </span>
                                                                 {utxo.height > 0 && (
                                                                     <span className="text-xs text-muted-foreground">
@@ -558,7 +560,7 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
                                                 </Button>
                                                 <Button variant="ghost" size="sm" asChild>
                                                     <a
-                                                        href={`https://flightpath.avn.network/address/${selectedNodeDetails.address}`}
+                                                        href={`https://radiantexplorer.com/address/${selectedNodeDetails.address}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                     >
@@ -586,7 +588,7 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
                                                 </Button>
                                                 <Button variant="ghost" size="sm" asChild>
                                                     <a
-                                                        href={`https://flightpath.avn.network/tx/${selectedNodeDetails.txid}`}
+                                                        href={`https://radiantexplorer.com/tx/${selectedNodeDetails.txid}`}
                                                         target="_blank"
                                                         rel="noopener noreferrer"
                                                     >

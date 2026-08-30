@@ -1,63 +1,28 @@
 /**
- * Avian RPC Service
+ * Radiant Chain Service
  *
- * Calls your local Avian Core node via the /api/rpc proxy route.
- * Requires the node to be running with:
- *   txindex=1, addressindex=1, spentindex=1, timestampindex=1
+ * Browser-side implementation of ChainDataService. Calls the /api/rpc proxy
+ * route using Bitcore-style index method names (getspentinfo, getaddresstxids,
+ * getaddressutxos, ...). The server decides how to answer:
+ *   - RADIANT_BACKEND=rpc       → forwarded to a radiantd node carrying
+ *                                 address/spent index patches
+ *   - RADIANT_BACKEND=electrumx → translated to ElectrumX scripthash lookups
  *
- * Key advantage over REST API: getspentinfo directly returns the spending
- * transaction for any UTXO — no address history scanning needed.
+ * Either way the responses have identical shapes, so the analysis engine
+ * never needs to know which backend is active.
  */
 
-// Re-export types used by OptimizedCoinFlowService
-export interface AvianTransaction {
-    hash: string;
-    height: number;
-    confirmations: number;
-    blocktime: number;
-    vin: Array<{
-        txid: string;
-        vout: number;
-        scriptSig?: unknown;
-        sequence?: number;
-        coinbase?: string;
-    }>;
-    vout: Array<{
-        n: number;
-        value: number;
-        valueSat: number;
-        scriptPubKey: {
-            address?: string;
-            addresses?: string[];
-            asm: string;
-            hex: string;
-            type: string;
-        };
-    }>;
-}
+import { photonsFromRxd, toPhotons } from '@/lib/amounts';
+import type {
+    AddressHistoryItem,
+    AddressUtxo,
+    BlockchainInfo,
+    ChainDataService,
+    ChainTransaction,
+    SpentInfo,
+} from './ChainDataService';
 
-export interface AvianAddressHistory {
-    txid: string;
-    height: number;
-    tx_hash: string;
-}
-
-export interface AddressUtxo {
-    address: string;
-    txid: string;
-    outputIndex: number;
-    satoshis: number;
-    height: number;
-    isUnspent: boolean;
-}
-
-export interface SpentInfo {
-    txid: string;
-    index: number; // vin index in spending tx
-    height?: number; // block height of the spending transaction
-}
-
-export class AvianRpcService {
+export class RadiantChainService implements ChainDataService {
     private requestCache: Map<string, unknown> = new Map();
     private cacheTimestamps: Map<string, number> = new Map();
     private readonly cacheTimeout: number = 600000; // 10 minutes
@@ -89,12 +54,14 @@ export class AvianRpcService {
         return data.result as T;
     }
 
-    private mapRawTx(raw: any): AvianTransaction {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private mapRawTx(raw: any): ChainTransaction {
         return {
             hash: raw.txid ?? raw.hash,
             height: raw.height ?? raw.blockheight ?? 0,
             confirmations: raw.confirmations ?? 0,
             blocktime: raw.blocktime ?? raw.time ?? 0,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             vin: (raw.vin || []).map((v: any) => ({
                 txid: v.txid ?? '',
                 vout: Number(v.vout ?? 0),
@@ -102,12 +69,15 @@ export class AvianRpcService {
                 sequence: v.sequence,
                 coinbase: v.coinbase,
             })),
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             vout: (raw.vout || []).map((o: any) => ({
                 n: o.n,
                 value: o.value ?? 0,
+                // Backends send valueSat as an exact decimal string parsed from
+                // the raw tx hex; the float path is a fallback only.
                 valueSat: o.valueSat !== undefined
-                    ? o.valueSat
-                    : Math.round((o.value ?? 0) * 1e8),
+                    ? toPhotons(o.valueSat)
+                    : photonsFromRxd(o.value ?? 0),
                 scriptPubKey: {
                     address: o.scriptPubKey?.address,
                     addresses: o.scriptPubKey?.addresses,
@@ -119,15 +89,16 @@ export class AvianRpcService {
         };
     }
 
-    async getTransaction(txid: string): Promise<AvianTransaction> {
+    async getTransaction(txid: string): Promise<ChainTransaction> {
         const cacheKey = `tx:${txid}`;
         const cached = this.requestCache.get(cacheKey);
         const cachedAt = this.cacheTimestamps.get(cacheKey) ?? 0;
         if (cached && Date.now() - cachedAt < this.cacheTimeout) {
-            return cached as AvianTransaction;
+            return cached as ChainTransaction;
         }
 
         // verbose=1 returns decoded transaction
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const raw = await this.rpcCall<any>('getrawtransaction', [txid, 1]);
         const transaction = this.mapRawTx(raw);
 
@@ -136,8 +107,8 @@ export class AvianRpcService {
         return transaction;
     }
 
-    async getTransactionsBatch(txids: string[]): Promise<Map<string, AvianTransaction>> {
-        const results = new Map<string, AvianTransaction>();
+    async getTransactionsBatch(txids: string[]): Promise<Map<string, ChainTransaction>> {
+        const results = new Map<string, ChainTransaction>();
         // Fetch in parallel (node can handle it, no external rate limit)
         await Promise.all(
             txids.map(async (txid) => {
@@ -154,7 +125,6 @@ export class AvianRpcService {
     /**
      * Directly find the transaction that spends txid:vout.
      * Returns null if the output is unspent.
-     * Requires spentindex=1 on the node.
      */
     async getSpentInfo(txid: string, vout: number): Promise<SpentInfo | null> {
         const cacheKey = `spent:${txid}:${vout}`;
@@ -182,17 +152,17 @@ export class AvianRpcService {
         return spentInfo === null;
     }
 
-    async getAddressHistory(address: string): Promise<AvianAddressHistory[]> {
+    async getAddressHistory(address: string): Promise<AddressHistoryItem[]> {
         const cacheKey = `history:${address}`;
         const cached = this.requestCache.get(cacheKey);
         const cachedAt = this.cacheTimestamps.get(cacheKey) ?? 0;
         if (cached && Date.now() - cachedAt < this.cacheTimeout) {
-            return cached as AvianAddressHistory[];
+            return cached as AddressHistoryItem[];
         }
 
         // Returns array of txids sorted by height (oldest first)
         const txids = await this.rpcCall<string[]>('getaddresstxids', [{ addresses: [address] }]);
-        const history: AvianAddressHistory[] = txids.map((txid) => ({
+        const history: AddressHistoryItem[] = txids.map((txid) => ({
             txid,
             height: 0,
             tx_hash: txid,
@@ -211,12 +181,14 @@ export class AvianRpcService {
         if (cached && Date.now() - cachedAt < 30000) {
             return cached as AddressUtxo[];
         }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const raw = await this.rpcCall<any[]>('getaddressutxos', [{ addresses: [address] }]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const items: AddressUtxo[] = (raw || []).map((u: any) => ({
             address: u.address ?? address,
             txid: u.txid,
             outputIndex: u.outputIndex,
-            satoshis: u.satoshis,
+            satoshis: toPhotons(u.satoshis ?? 0),
             height: u.height || 0,
             isUnspent: true,
         }));
@@ -241,7 +213,7 @@ export class AvianRpcService {
         const hasMoreUnspent = allUnspent.length > pageOffset + pageSize;
 
         // Show recent spent outputs only on the first page (best-effort).
-        let spentItems: AddressUtxo[] = [];
+        const spentItems: AddressUtxo[] = [];
         if (pageOffset === 0) {
             try {
                 const allTxids = await this.rpcCall<string[]>('getaddresstxids', [{ addresses: [address] }]);
@@ -280,7 +252,8 @@ export class AvianRpcService {
         return { items: [...unspentPage, ...spentItems], hasMoreUnspent };
     }
 
-    async getBlockchainInfo(): Promise<{ height: number; bestblockhash: string; difficulty: number }> {
+    async getBlockchainInfo(): Promise<BlockchainInfo> {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const raw = await this.rpcCall<any>('getblockchaininfo', []);
         return {
             height: raw.blocks ?? 0,

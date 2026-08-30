@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useCallback, useMemo, useEffect, useState } from 'react';
+import { formatRxd, photonsToNumber } from '@/lib/amounts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -59,8 +60,7 @@ const CoinFlowNodeComponent = ({
         return '#6b7280';
     };
 
-    const formatAmount = (amount: number): string =>
-        (amount / 100000000).toFixed(8) + ' AVN';
+    const formatAmount = (amount: bigint): string => formatRxd(amount) + ' RXD';
 
     const nodeData = data.nodeData as CoinFlowNode;
     const color = getNodeColor(nodeData);
@@ -247,7 +247,7 @@ const NodeDetailsCard: React.FC<{ node: CoinFlowNode; onClose?: () => void }> = 
     node,
     onClose,
 }) => {
-    const formatAmount = (amount: number) => (amount / 100000000).toFixed(8) + ' AVN';
+    const formatAmount = (amount: bigint) => formatRxd(amount) + ' RXD';
 
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
@@ -256,7 +256,7 @@ const NodeDetailsCard: React.FC<{ node: CoinFlowNode; onClose?: () => void }> = 
 
     const openInExplorer = (address: string) => {
         window.open(
-            `https://flightpath.avn.network/address/${address}`,
+            `https://radiantexplorer.com/address/${address}`,
             '_blank',
             'noopener,noreferrer',
         );
@@ -380,7 +380,7 @@ export const CoinFlowGraphVisualization: React.FC<CoinFlowGraphVisualizationProp
     const [isExporting, setIsExporting] = useState(false);
     const [forceRender, setForceRender] = useState(false);
 
-    const formatAmount = (amount: number) => (amount / 100000000).toFixed(8) + ' AVN';
+    const formatAmount = (amount: bigint) => formatRxd(amount) + ' RXD';
 
     const { nodes: flowNodes, edges: flowEdges } = useMemo(() => {
         const nodes: Node[] = [];
@@ -419,8 +419,8 @@ export const CoinFlowGraphVisualization: React.FC<CoinFlowGraphVisualizationProp
             if (!sourceNode || !targetNode) return;
 
             const edgeId = edge.id || `${edge.from}->${edge.to}-${index}`;
-            const amountInAVN = edge.amount / 100000000;
-            const logAmount = Math.log10(amountInAVN + 0.001);
+            const amountInRxd = photonsToNumber(edge.amount) / 100000000;
+            const logAmount = Math.log10(amountInRxd + 0.001);
             const normalized = (logAmount - Math.log10(0.001)) / (Math.log10(1000) - Math.log10(0.001));
             const strokeWidth = Math.max(2, Math.min(16, 2 + normalized * 14));
 
@@ -518,7 +518,7 @@ export const CoinFlowGraphVisualization: React.FC<CoinFlowGraphVisualizationProp
 
         const txShort = graph.startingUtxo.txid.slice(0, 8);
         const addrShort = graph.startingUtxo.address.slice(0, 10);
-        const baseName = `avian-coinflow-${txShort}-${addrShort}`;
+        const baseName = `radiant-coinflow-${txShort}-${addrShort}`;
 
         setIsExporting(true);
         try {
