@@ -11,7 +11,7 @@
         "15mpU1khxUuuAVHRq8DJRNaP2pW8dghZF5",
         "147x8VCuUDLn7EgbKPN8GY6k46EKqoPoGa"
       ],
-      "source": "Hot wallet 15mpU1kh… (#3 rich list, ~1B RXD) confirmed via verified withdrawal tx 286d46f… (2026-08-30), consistent across older tx ab561f6…. Cluster not yet expanded — address too busy for ElectrumX (needs radiantd address index). Cold wallet 147x8VC… (90M RXD) user-reported, not yet on-chain linked to the hot wallet."
+      "source": "Hot wallet 15mpU1kh… (#3 rich list, ~1B RXD) confirmed via verified withdrawal tx 286d46f… (2026-08-30), consistent across older tx ab561f6…. Single-address hot wallet — no operational cluster: RXinDexer REST history (52,738 txs) shows it only ever co-spends its own UTXOs, so common-input clustering yields nothing further. Cold wallet 147x8VC… (90M RXD) user-reported, not on-chain linked to the hot wallet."
     },
     "MEXC": {
       "name": "MEXC",
