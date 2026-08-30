@@ -12,6 +12,7 @@
  */
 
 import { parseJsonPreservingBigInts } from '../jsonBigInt';
+import { enrichScriptMetadata } from '../scriptmeta';
 import { enrichVoutValues } from '../txvalues';
 import { BackendRpcError, ChainBackend } from './ChainBackend';
 
@@ -88,6 +89,8 @@ export class NodeRpcBackend implements ChainBackend {
             // Overwrite any node-provided valueSat with exact strings from the
             // raw hex — JSON numbers are lossy above 2^53 photons.
             enrichVoutValues(tx);
+            // Attach owner address / refs / scripthash to ref+contract outputs.
+            enrichScriptMetadata(tx as Parameters<typeof enrichScriptMetadata>[0]);
         }
 
         return result;

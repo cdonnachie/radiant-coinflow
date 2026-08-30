@@ -84,6 +84,10 @@ export class RadiantChainService implements ChainDataService {
                     asm: o.scriptPubKey?.asm ?? '',
                     hex: o.scriptPubKey?.hex ?? '',
                     type: o.scriptPubKey?.type ?? '',
+                    ownerAddress: o.scriptPubKey?.ownerAddress,
+                    refs: o.scriptPubKey?.refs,
+                    hasRefs: o.scriptPubKey?.hasRefs,
+                    scripthash: o.scriptPubKey?.scripthash,
                 },
             })),
         };

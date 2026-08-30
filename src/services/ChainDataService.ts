@@ -31,6 +31,13 @@ export interface ChainTransaction {
             asm: string;
             hex: string;
             type: string;
+            /** Owner embedded in a ref/token script (P2PKH+refs pattern). */
+            ownerAddress?: string;
+            /** 36-byte ref payloads (hex) — present on token/contract outputs. */
+            refs?: string[];
+            hasRefs?: boolean;
+            /** Electrum-style scripthash — stable identity for contract outputs. */
+            scripthash?: string;
         };
     }>;
 }

@@ -120,6 +120,11 @@ const CoinFlowNodeComponent = ({
                         !nodeData.wallet?.serviceName &&
                         (nodeData.inputCount && nodeData.inputCount > 1 ? 'Source' : 'Address')}
                 </div>
+                {(nodeData.hasRefs || nodeData.isContract) && (
+                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-100 text-cyan-800">
+                        {nodeData.isContract ? 'CONTRACT' : 'TOKEN'}
+                    </span>
+                )}
             </div>
 
             <div className="text-sm font-semibold text-gray-900 mb-1">
@@ -276,6 +281,7 @@ const NodeDetailsCard: React.FC<{ node: CoinFlowNode; onClose?: () => void }> = 
         if (node.isUnspent) return 'Unspent';
         if (node.wallet?.isOwnWallet) return 'Your Wallet';
         if (node.wallet?.serviceName) return node.wallet.serviceName;
+        if (node.isContract) return 'Contract';
         if (node.inputCount && node.inputCount > 1) return `Source (${node.inputCount} inputs)`;
         return 'Address';
     };
@@ -304,7 +310,9 @@ const NodeDetailsCard: React.FC<{ node: CoinFlowNode; onClose?: () => void }> = 
             </CardHeader>
             <CardContent className="space-y-4">
                 <div>
-                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Address</label>
+                    <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                        {node.isContract ? 'Contract (scripthash)' : 'Address'}
+                    </label>
                     <div className="flex items-center gap-2 mt-1">
                         <code className="text-xs bg-muted px-2 py-1 rounded font-mono break-all flex-1">
                             {node.address}
@@ -312,10 +320,17 @@ const NodeDetailsCard: React.FC<{ node: CoinFlowNode; onClose?: () => void }> = 
                         <Button variant="ghost" size="sm" onClick={() => copyToClipboard(node.address)}>
                             <Copy className="h-3 w-3" />
                         </Button>
-                        <Button variant="ghost" size="sm" onClick={() => openInExplorer(node.address)}>
-                            <ExternalLink className="h-3 w-3" />
-                        </Button>
+                        {!node.isContract && (
+                            <Button variant="ghost" size="sm" onClick={() => openInExplorer(node.address)}>
+                                <ExternalLink className="h-3 w-3" />
+                            </Button>
+                        )}
                     </div>
+                    {(node.hasRefs || node.isContract) && (
+                        <div className="text-xs text-cyan-700 dark:text-cyan-400 mt-1">
+                            {node.isContract ? 'Contract output (Radiant refs)' : 'Token output — carries Radiant refs'}
+                        </div>
+                    )}
                 </div>
                 <Separator />
                 <div className="grid grid-cols-2 gap-4">

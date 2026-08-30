@@ -546,7 +546,9 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
                                     </CardHeader>
                                     <CardContent className="space-y-4">
                                         <div>
-                                            <Label className="text-xs text-muted-foreground">Address</Label>
+                                            <Label className="text-xs text-muted-foreground">
+                                                {selectedNodeDetails.isContract ? 'Contract (scripthash)' : 'Address'}
+                                            </Label>
                                             <div className="flex items-center gap-2 mt-1">
                                                 <code className="text-xs bg-muted px-2 py-1 rounded break-all flex-1">
                                                     {selectedNodeDetails.address}
@@ -558,16 +560,25 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
                                                 >
                                                     <Copy className="h-3 w-3" />
                                                 </Button>
-                                                <Button variant="ghost" size="sm" asChild>
-                                                    <a
-                                                        href={`https://radiantexplorer.com/address/${selectedNodeDetails.address}`}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                    >
-                                                        <ExternalLink className="h-3 w-3" />
-                                                    </a>
-                                                </Button>
+                                                {!selectedNodeDetails.isContract && (
+                                                    <Button variant="ghost" size="sm" asChild>
+                                                        <a
+                                                            href={`https://radiantexplorer.com/address/${selectedNodeDetails.address}`}
+                                                            target="_blank"
+                                                            rel="noopener noreferrer"
+                                                        >
+                                                            <ExternalLink className="h-3 w-3" />
+                                                        </a>
+                                                    </Button>
+                                                )}
                                             </div>
+                                            {(selectedNodeDetails.hasRefs || selectedNodeDetails.isContract) && (
+                                                <Badge variant="secondary" className="mt-2">
+                                                    {selectedNodeDetails.isContract
+                                                        ? 'Contract output'
+                                                        : 'Token output (carries refs)'}
+                                                </Badge>
+                                            )}
                                         </div>
                                         <div>
                                             <Label className="text-xs text-muted-foreground">Transaction</Label>

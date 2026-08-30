@@ -75,17 +75,17 @@ export class OptimizedCoinFlowService {
         }
 
         const startingOutput = startingTx.vout[vout];
-        const startingAddress = this.extractAddress(startingOutput);
+        const startingIdentity = this.extractOutputIdentity(startingOutput);
         const startingAmount = startingOutput.valueSat;
 
-        if (!startingAddress) {
+        if (!startingIdentity) {
             throw new Error(`Could not extract address from output ${vout}`);
         }
 
         const graph: CoinFlowGraph = {
             nodes: [],
             edges: [],
-            startingUtxo: { txid, vout, address: startingAddress, amount: startingAmount },
+            startingUtxo: { txid, vout, address: startingIdentity.address, amount: startingAmount },
             maxDepth: opts.maxDepth,
             transactionCount: 0,
             walletClusters: [],
@@ -102,13 +102,15 @@ export class OptimizedCoinFlowService {
             id: `${txid}:${vout}`,
             txid,
             vout,
-            address: startingAddress,
+            address: startingIdentity.address,
             amount: startingAmount,
             blockHeight: startingTx.height || undefined,
             confirmations: startingTx.confirmations,
             isUnspent: false,
             depth: 0,
             isStarting: true,
+            hasRefs: startingIdentity.hasRefs || undefined,
+            isContract: startingIdentity.isContract || undefined,
         };
 
         graph.nodes.push(startingNode);
@@ -175,11 +177,14 @@ export class OptimizedCoinFlowService {
 
             for (let i = 0; i < spendingTx.vout.length; i++) {
                 const output = spendingTx.vout[i];
-                const outputAddress = this.extractAddress(output);
+                const identity = this.extractOutputIdentity(output);
                 const outputAmount = output.valueSat;
 
-                if (!outputAddress) continue;
-                if (!options.includeDust && outputAmount <= BigInt(options.dustThreshold)) continue;
+                if (!identity) continue;
+                // Token/contract outputs carry dust-level RXD by design —
+                // never dust-filter them or token flows disappear.
+                const isTokenLike = identity.hasRefs || identity.isContract;
+                if (!options.includeDust && !isTokenLike && outputAmount <= BigInt(options.dustThreshold)) continue;
 
                 const isUnspent = await this.apiService.isOutputUnspent(spendingTx.hash, i);
                 this.requestCount++;
@@ -188,12 +193,14 @@ export class OptimizedCoinFlowService {
                     id: `${spendingTx.hash}:${i}`,
                     txid: spendingTx.hash,
                     vout: i,
-                    address: outputAddress,
+                    address: identity.address,
                     amount: outputAmount,
                     blockHeight: (spentInfo.height ?? spendingTx.height) || undefined,
                     confirmations: spendingTx.confirmations,
                     isUnspent,
                     depth: currentDepth + 1,
+                    hasRefs: identity.hasRefs || undefined,
+                    isContract: identity.isContract || undefined,
                 };
 
                 graph.nodes.push(outputNode);
@@ -216,7 +223,7 @@ export class OptimizedCoinFlowService {
                     currentDepth + 1,
                 );
 
-                if (options.stopAtExchanges && this.knownExchanges.has(outputAddress)) continue;
+                if (options.stopAtExchanges && this.knownExchanges.has(identity.address)) continue;
 
                 if (!isUnspent) {
                     await this.traceFlowOptimized(
@@ -247,7 +254,8 @@ export class OptimizedCoinFlowService {
         }
 
         const startingOutput = startingTx.vout[vout];
-        const startingAddress = this.extractAddress(startingOutput);
+        const startingIdentity = this.extractOutputIdentity(startingOutput);
+        const startingAddress = startingIdentity?.address;
         const startingAmount = startingOutput.valueSat;
 
         if (!startingAddress) {
@@ -281,6 +289,8 @@ export class OptimizedCoinFlowService {
             isUnspent: true,
             depth: 0,
             isStarting: true,
+            hasRefs: startingIdentity.hasRefs || undefined,
+            isContract: startingIdentity.isContract || undefined,
         };
 
         graph.nodes.push(startingNode);
@@ -354,6 +364,8 @@ export class OptimizedCoinFlowService {
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 sourceOutput: any;
                 sourceAddress: string;
+                hasRefs: boolean;
+                isContract: boolean;
             }
 
             const vinInfos: VinInfo[] = [];
@@ -362,11 +374,17 @@ export class OptimizedCoinFlowService {
                 this.requestCount++;
                 const sourceOutput = sourceTx.vout[vin.vout];
                 if (!sourceOutput) continue;
-                const sourceAddress = this.extractAddress(sourceOutput);
-                if (!sourceAddress) continue;
+                const identity = this.extractOutputIdentity(sourceOutput);
+                if (!identity) continue;
                 if (options.confirmedOnly && sourceTx.confirmations < options.minConfirmations) continue;
-                if (!options.includeDust && sourceOutput.valueSat <= BigInt(options.dustThreshold)) continue;
-                vinInfos.push({ vin, sourceTx, sourceOutput, sourceAddress });
+                const isTokenLike = identity.hasRefs || identity.isContract;
+                if (!options.includeDust && !isTokenLike && sourceOutput.valueSat <= BigInt(options.dustThreshold)) continue;
+                vinInfos.push({
+                    vin, sourceTx, sourceOutput,
+                    sourceAddress: identity.address,
+                    hasRefs: identity.hasRefs,
+                    isContract: identity.isContract,
+                });
             }
 
             // Group inputs by source address — one aggregate node per address
@@ -398,6 +416,8 @@ export class OptimizedCoinFlowService {
                         isUnspent: false,
                         depth: currentDepth + 1,
                         inputCount: infos.length,
+                        hasRefs: infos.some((i) => i.hasRefs) || undefined,
+                        isContract: infos.some((i) => i.isContract) || undefined,
                     };
                     graph.nodes.push(sourceNode);
                 }
@@ -494,15 +514,37 @@ export class OptimizedCoinFlowService {
         return results;
     }
 
-    private extractAddress(output: { scriptPubKey?: { address?: string; addresses?: string[] } }): string | null {
-        if (output.scriptPubKey?.addresses && output.scriptPubKey.addresses.length > 0) {
-            return output.scriptPubKey.addresses[0];
-        }
-        if (output.scriptPubKey?.address) {
-            return output.scriptPubKey.address;
+    /**
+     * Resolves the identity of an output so value never silently vanishes:
+     *  - standard outputs → their address
+     *  - ref/token outputs with an embedded P2PKH owner → the owner address
+     *  - pure contract outputs → a synthetic `contract:<scripthash>` identity
+     *  - OP_RETURN / undecodable outputs → null (unspendable, skipped)
+     */
+    private extractOutputIdentity(output: {
+        scriptPubKey?: {
+            address?: string;
+            addresses?: string[];
+            type?: string;
+            ownerAddress?: string;
+            hasRefs?: boolean;
+            scripthash?: string;
+        };
+    }): { address: string; isContract: boolean; hasRefs: boolean } | null {
+        const spk = output.scriptPubKey;
+        if (!spk) return null;
+        const hasRefs = spk.hasRefs === true;
+
+        const addr = (spk.addresses && spk.addresses[0]) || spk.address;
+        if (addr) return { address: addr, isContract: false, hasRefs };
+        if (spk.ownerAddress) return { address: spk.ownerAddress, isContract: false, hasRefs };
+        if (spk.type === 'nulldata') return null;
+        if (spk.scripthash) {
+            return { address: `contract:${spk.scripthash.slice(0, 16)}`, isContract: true, hasRefs };
         }
         return null;
     }
+
 
     private getDefaultOptions(options: CoinFlowOptions): Required<CoinFlowOptions> {
         const isBackward = options.direction === 'backward';

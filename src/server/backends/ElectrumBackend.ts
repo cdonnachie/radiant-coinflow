@@ -23,6 +23,7 @@
 import { ElectrumClient } from '../electrum/ElectrumClient';
 import { addressToScripthash, scriptHexToScripthash } from '../electrum/scripthash';
 import { wireIntToBigInt } from '../jsonBigInt';
+import { enrichScriptMetadata } from '../scriptmeta';
 import { enrichVoutValues } from '../txvalues';
 import { BackendRpcError, ChainBackend } from './ChainBackend';
 
@@ -125,6 +126,8 @@ export class ElectrumBackend implements ChainBackend {
         // Attach exact valueSat strings parsed from the raw hex — the JSON
         // decimal `value` fields lose precision above 2^53 photons.
         enrichVoutValues(tx);
+        // Attach owner address / refs / scripthash to ref+contract outputs.
+        enrichScriptMetadata(tx);
 
         // Only confirmed transactions are effectively immutable; cache those.
         if ((tx.confirmations ?? 0) > 0) {

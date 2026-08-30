@@ -30,6 +30,10 @@ export interface CoinFlowNode {
     isStarting?: boolean;
     /** Number of inputs aggregated into this node (backward tracing only, when > 1) */
     inputCount?: number;
+    /** Output carries Radiant refs (token/induction contract) */
+    hasRefs?: boolean;
+    /** Pure contract output with no owner address (identified by scripthash) */
+    isContract?: boolean;
 }
 
 export interface CoinFlowEdge {
