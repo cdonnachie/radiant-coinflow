@@ -84,6 +84,20 @@ Known addresses are read from `public/data/exchange-addresses.json` at startup. 
 }
 ```
 
+### Populating the pool list automatically
+
+`pnpm scan-pools` scans recent coinbase transactions via your ElectrumX server,
+decodes the pool tags miners embed in coinbase scripts, and rewrites the
+`mining_pools` section (manually added pools are preserved). Curated
+address → pool identities live in `scripts/pool-names.json` and take
+precedence over decoded tags.
+
+```bash
+pnpm scan-pools                    # last 20000 blocks
+pnpm scan-pools -- --blocks 50000  # deeper history
+pnpm scan-pools -- --dry-run       # preview without writing
+```
+
 ## Systemd service
 
 See [`radiant-coinflow.service`](radiant-coinflow.service) for a ready-to-use unit file.

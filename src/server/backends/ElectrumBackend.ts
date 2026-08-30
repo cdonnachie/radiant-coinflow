@@ -50,10 +50,12 @@ interface VerboseTx {
 }
 
 // How many candidate spending transactions to inspect before giving up.
-// Filtering by funding height keeps this small in practice; the cap protects
-// against pathological hot-wallet addresses with enormous histories.
-const MAX_SPEND_SCAN = 400;
-const SPEND_SCAN_BATCH = 10;
+// Filtering by funding height keeps this small in practice; the cap bounds
+// wall-clock on hot-wallet addresses with enormous histories. Scanned
+// transactions land in the tx cache, so sibling outputs of the same busy
+// address amortize the cost. Override with RADIANT_SPEND_SCAN_LIMIT.
+const MAX_SPEND_SCAN = Number(process.env.RADIANT_SPEND_SCAN_LIMIT ?? 2500);
+const SPEND_SCAN_BATCH = 25;
 const TX_CACHE_MAX = 8000;
 const SPENT_CACHE_MAX = 20000;
 

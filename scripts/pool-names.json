@@ -1,0 +1,13 @@
+{
+  "_comment": "Curated payout-address → pool identity. The coinbase scanner (scan-pools.mjs) prefers these names over tags decoded from coinbase scripts. Add new entries as pools are identified.",
+  "18q4q4inRrSrtH7odnWMsvzVV9UjcxaecP": { "name": "Vipor", "link": "https://vipor.net" },
+  "1Y42ZwmNwVDyPQvLMgSTmQAB1Ff1Eo7zG": { "name": "Kryptex", "link": "https://pool.kryptex.com" },
+  "1D3Eb2AVLeZiCczLn98f5DrovHTfqhSWvs": { "name": "WhalePool", "link": "https://whalepool.com/" },
+  "1C1aMMkSbwLgXRG12XumHTvF2Z4iDcZDJD": { "name": "HumPool", "link": "https://humpool.com/" },
+  "1MBm1CZGSxa8DbDRjNVigyYXo24gU3AEfv": { "name": "M2Pool", "link": "https://m2pool.com/" },
+  "13kNHnq2cKi6aZFcj7xw4aDqZcfPYoxFcC": { "name": "ZergPool", "link": "https://zergpool.com/" },
+  "1CZdCy9QBuDgUF3a1FFPznBhrLFjU9gngv": { "name": "K1Pool", "link": "https://k1pool.com/" },
+  "1GZAEmCcfm2if8H85uociuLdEiSW3uV9gG": { "name": "ZPool", "link": "https://zpool.ca/" },
+  "12RD8QJiqKuVEMpbVj7KBGsmcWjPt2iBmK": { "name": "Idyllic Mining", "link": "https://icminers.com/" },
+  "15gGAxnp5jTyTuvs6iQE74bDH5zQMvKA56": { "name": "Idyllic Mining", "link": "https://icminers.com/" }
+}
