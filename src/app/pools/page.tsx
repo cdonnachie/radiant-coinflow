@@ -46,6 +46,17 @@ const fmtDate = (ts: number) =>
 const fmtInterval = (h: number | null) =>
     h == null ? '—' : h < 1 ? `${Math.round(h * 60)} min` : h < 48 ? `${h.toFixed(1)} h` : `${(h / 24).toFixed(1)} d`;
 
+// A pool is "active" if it had on-chain activity within the last ~14 days;
+// otherwise show how long ago it was last active (i.e. likely shut down).
+const AGO = (days: number) =>
+    days < 1 ? 'today' : days < 45 ? `${Math.round(days)}d ago`
+        : days < 365 ? `${Math.round(days / 30)}mo ago` : `${(days / 365).toFixed(1)}y ago`;
+function activity(windowEnd: number | null) {
+    if (!windowEnd) return { active: false, label: 'unknown' };
+    const days = (Date.now() / 1000 - windowEnd) / 86400;
+    return { active: days <= 14, label: AGO(days), days };
+}
+
 export default function PoolsPage() {
     const [data, setData] = useState<PoolData | null>(null);
     const [loading, setLoading] = useState(true);
@@ -88,8 +99,13 @@ export default function PoolsPage() {
 
             {!loading && data && data.pools.length > 0 && (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    {data.pools.map((p) => (
-                        <Card key={p.key} className="flex flex-col">
+                    {[...data.pools]
+                        .sort((a, b) => Number(activity(b.windowEnd).active) - Number(activity(a.windowEnd).active)
+                            || b.rewardRxd - a.rewardRxd)
+                        .map((p) => {
+                        const act = activity(p.windowEnd);
+                        return (
+                        <Card key={p.key} className={`flex flex-col ${act.active ? '' : 'opacity-70'}`}>
                             <CardHeader className="pb-3">
                                 <div className="flex items-start justify-between gap-2">
                                     <CardTitle className="text-lg flex items-center gap-2">
@@ -101,12 +117,23 @@ export default function PoolsPage() {
                                             </a>
                                         ) : p.name}
                                     </CardTitle>
-                                    <Badge variant={p.pattern === 'direct' ? 'default' : 'secondary'}>
-                                        {p.pattern === 'direct' ? 'Direct payouts'
-                                            : p.pattern === 'consolidation' ? 'Consolidates'
-                                            : 'No payouts'}
-                                    </Badge>
+                                    <div className="flex flex-col items-end gap-1 shrink-0">
+                                        <Badge
+                                            variant={act.active ? 'default' : 'outline'}
+                                            className={act.active ? 'bg-green-600 hover:bg-green-600' : 'text-muted-foreground'}
+                                        >
+                                            {act.active ? 'Active' : 'Inactive'}
+                                        </Badge>
+                                        {!act.active && (
+                                            <span className="text-[10px] text-muted-foreground">last active {act.label}</span>
+                                        )}
+                                    </div>
                                 </div>
+                                <Badge variant={p.pattern === 'direct' ? 'default' : 'secondary'} className="w-fit mt-1">
+                                    {p.pattern === 'direct' ? 'Direct payouts'
+                                        : p.pattern === 'consolidation' ? 'Consolidates'
+                                        : 'No payouts'}
+                                </Badge>
                             </CardHeader>
                             <CardContent className="space-y-4 flex-1">
                                 <div className="grid grid-cols-3 gap-3 text-sm">
@@ -185,7 +212,8 @@ export default function PoolsPage() {
                                 </div>
                             </CardContent>
                         </Card>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
         </div>
