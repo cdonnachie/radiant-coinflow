@@ -15,8 +15,11 @@ A self-hosted web tool for tracing and visualising coin movement on the [Radiant
 ## Requirements
 
 - Node.js 20+ and [pnpm](https://pnpm.io)
-- One of two chain data backends:
-  - **ElectrumX** (works today) — any Radiant ElectrumX server
+- One of three chain data backends:
+  - **RXinDexer REST** (recommended) — the node's REST API; paginated history with
+    no size ceiling, so busy exchange/pool wallets still trace and cluster
+  - **ElectrumX** — any Radiant ElectrumX server; fast, but refuses very large
+    address histories
   - **Native RPC** — a radiantd build carrying the address/spent index patches, with
     `txindex=1`, `addressindex=1`, `spentindex=1` enabled
 
@@ -27,6 +30,13 @@ pnpm install
 ```
 
 Create `.env.local` in the project root (see `.env.local.example`).
+
+For the RXinDexer REST backend:
+
+```env
+RADIANT_BACKEND=rest
+RADIANT_REST_URL=http://127.0.0.1:8000
+```
 
 For the ElectrumX backend:
 
@@ -47,7 +57,7 @@ RADIANT_RPC_PASS=your_rpc_password
 ```
 
 RPC credentials must match the `rpcuser` / `rpcpassword` in your `radiant.conf`.
-Both backends serve identical response shapes, so switching between them is
+All three backends serve identical response shapes, so switching between them is
 purely a configuration change.
 
 ## Development
@@ -126,4 +136,4 @@ See [`radiant-coinflow.service`](radiant-coinflow.service) for a ready-to-use un
 | Graph | ReactFlow + Dagre layout |
 | Export | html-to-image + jsPDF |
 | Theming | next-themes |
-| Chain data | ElectrumX or Radiant Core JSON-RPC (proxied via `/api/rpc`) |
+| Chain data | RXinDexer REST, ElectrumX, or Radiant Core JSON-RPC (proxied via `/api/rpc`) |
