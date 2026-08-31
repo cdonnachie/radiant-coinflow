@@ -18,7 +18,7 @@ export async function GET() {
             {
                 generatedAt: null,
                 pools: [],
-                error: 'Pool payout data not generated yet. Run `pnpm pool-payouts` to build public/data/pool-payouts.json.',
+                error: 'Pool payout data is not available yet. Please check back shortly.',
             },
             { status: 200 },
         );

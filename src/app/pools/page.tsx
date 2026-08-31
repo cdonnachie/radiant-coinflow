@@ -72,8 +72,7 @@ export default function PoolsPage() {
                 {data?.generatedAt && (
                     <p className="text-xs text-muted-foreground flex items-center gap-1">
                         <RefreshCw className="h-3 w-3" />
-                        Generated {new Date(data.generatedAt).toLocaleString()} · regenerate with{' '}
-                        <code className="bg-muted px-1 rounded">pnpm pool-payouts</code>
+                        Updated {new Date(data.generatedAt).toLocaleString()}
                     </p>
                 )}
             </div>
