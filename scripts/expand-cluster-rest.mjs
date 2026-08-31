@@ -15,8 +15,11 @@
  *   --max-addrs N     stop growing beyond N addresses (default 2000)
  *   --max-history N   per-address history txs to scan (default 6000)
  *   --min-cospend N   only keep addresses that co-spend with a known member in
- *                     at least N transactions (default 2) — filters one-off
- *                     coincidental co-inputs
+ *                     at least N transactions (default 1). On a chain without
+ *                     coinjoin a single shared input already proves common
+ *                     ownership, so 1 is correct; raise it only to be extra
+ *                     conservative (which drops legitimate consolidation-only
+ *                     members that co-spend exactly once).
  *   --merge NAME      union the result into exchanges[NAME]
  *
  * REST base URL from RADIANT_REST_URL (or .env.local).
@@ -32,7 +35,7 @@ const OUT_PATH = join(ROOT, 'public', 'data', 'exchange-addresses.json');
 
 const args = process.argv.slice(2);
 const seeds = [];
-let hopsMax = 2, maxAddrs = 2000, maxHistory = 6000, minCospend = 2, mergeName = null;
+let hopsMax = 2, maxAddrs = 2000, maxHistory = 6000, minCospend = 1, mergeName = null, outPath = null;
 for (let i = 0; i < args.length; i++) {
     switch (args[i]) {
         case '--hops': hopsMax = Number(args[++i]); break;
@@ -40,6 +43,7 @@ for (let i = 0; i < args.length; i++) {
         case '--max-history': maxHistory = Number(args[++i]); break;
         case '--min-cospend': minCospend = Number(args[++i]); break;
         case '--merge': mergeName = args[++i]; break;
+        case '--out': outPath = args[++i]; break;
         default:
             if (/^[13][1-9A-HJ-NP-Za-km-z]{25,34}$/.test(args[i])) seeds.push(args[i]);
             else { console.error(`Unrecognized argument: ${args[i]}`); process.exit(1); }
@@ -61,17 +65,24 @@ async function fetchJson(path, retries = 4) {
                 continue;
             }
             return null;
-        } catch (e) {
+        } catch {
             if (attempt < retries) { await sleep(250 * 2 ** attempt); continue; }
-            throw e;
+            return null; // give up on this one call rather than aborting the whole run
         }
     }
 }
 
+const TX_CACHE_MAX = 40000;
 const txCache = new Map();
 async function getTx(txid) {
     if (txCache.has(txid)) return txCache.get(txid);
     const tx = await fetchJson(`/transaction/${txid}`);
+    if (txCache.size >= TX_CACHE_MAX) {
+        // Evict the oldest ~10% (Map preserves insertion order) to bound memory
+        // on large expansions.
+        let n = Math.floor(TX_CACHE_MAX * 0.1);
+        for (const k of txCache.keys()) { if (n-- <= 0) break; txCache.delete(k); }
+    }
     txCache.set(txid, tx);
     return tx;
 }
@@ -104,43 +115,81 @@ async function inputAddresses(tx) {
     return addrs;
 }
 
+const CHECKPOINT_EVERY = 2; // addresses processed between checkpoint writes (frequent: survive kills)
+
+// Resumable, checkpointing BFS. State is written to --out (with a `_resume`
+// block) as it runs, so a killed run continues where it left off on re-launch.
 async function main() {
     console.log(`REST cluster expansion from ${seeds.join(', ')} (base ${BASE})`);
-    const known = new Set(seeds);
-    const cospendCounts = new Map(seeds.map((s) => [s, Infinity]));
-    const skipped = new Set();
-    let frontier = [...seeds];
 
-    for (let hop = 1; hop <= hopsMax && frontier.length && known.size < maxAddrs; hop++) {
-        const next = [];
-        console.log(`Hop ${hop}: expanding ${frontier.length} address(es)…`);
-        for (const addr of frontier) {
-            if (known.size >= maxAddrs) break;
-            const { txids, truncated } = await historyTxids(addr, maxHistory);
-            if (truncated) skipped.add(addr);
-            let processed = 0;
-            for (let i = 0; i < txids.length; i += 12) {
-                const batch = txids.slice(i, i + 12);
-                const txs = await Promise.all(batch.map((t) => getTx(t).catch(() => null)));
-                for (const tx of txs) {
-                    if (!tx) continue;
-                    const ins = await inputAddresses(tx);
-                    if (!ins.has(addr)) continue; // addr must be an INPUT (co-spend)
-                    for (const a of ins) {
-                        if (a === addr) continue;
-                        cospendCounts.set(a, (cospendCounts.get(a) ?? 0) + 1);
-                        if (!known.has(a) && cospendCounts.get(a) >= minCospend) {
-                            known.add(a); next.push(a);
-                            if (known.size >= maxAddrs) break;
-                        }
+    const known = new Set(seeds);
+    const processed = new Set();
+    const skipped = new Set();
+    const cospendCounts = new Map(seeds.map((s) => [s, Infinity]));
+    let queue = seeds.map((addr) => ({ addr, hop: 0 }));
+
+    // Auto-resume from a prior checkpoint if the out file carries one.
+    if (outPath && existsSync(outPath)) {
+        try {
+            const st = JSON.parse(readFileSync(outPath, 'utf8'))._resume;
+            if (st && Array.isArray(st.cluster)) {
+                st.cluster.forEach((a) => known.add(a));
+                (st.processed || []).forEach((a) => processed.add(a));
+                (st.skipped || []).forEach((a) => skipped.add(a));
+                for (const [a, c] of st.cospendCounts || []) cospendCounts.set(a, c === null ? Infinity : c);
+                queue = st.queue || [];
+                console.log(`Resumed: ${known.size} known, ${processed.size} processed, ${queue.length} queued`);
+            }
+        } catch { /* start fresh */ }
+    }
+
+    const checkpoint = (final = false) => {
+        if (!outPath) return;
+        const cluster = [...known].sort();
+        writeFileSync(outPath, JSON.stringify({
+            seed: seeds, cluster, count: cluster.length,
+            cappedAtMaxAddrs: known.size >= maxAddrs,
+            complete: final,
+            _resume: {
+                cluster: [...known], processed: [...processed], skipped: [...skipped],
+                cospendCounts: [...cospendCounts].map(([a, c]) => [a, c === Infinity ? null : c]),
+                queue,
+            },
+        }, null, 2) + '\n');
+    };
+
+    let sinceCheckpoint = 0;
+    while (queue.length && known.size < maxAddrs) {
+        const { addr, hop } = queue.shift();
+        if (processed.has(addr) || hop >= hopsMax) { processed.add(addr); continue; }
+        processed.add(addr);
+
+        const { txids, truncated } = await historyTxids(addr, maxHistory);
+        if (truncated) skipped.add(addr);
+        let scanned = 0;
+        for (let i = 0; i < txids.length; i += 12) {
+            const batch = txids.slice(i, i + 12);
+            const txs = await Promise.all(batch.map((t) => getTx(t).catch(() => null)));
+            for (const tx of txs) {
+                if (!tx) continue;
+                const ins = await inputAddresses(tx);
+                if (!ins.has(addr)) continue; // addr must be an INPUT (co-spend)
+                for (const a of ins) {
+                    if (a === addr) continue;
+                    cospendCounts.set(a, (cospendCounts.get(a) ?? 0) + 1);
+                    if (!known.has(a) && cospendCounts.get(a) >= minCospend) {
+                        known.add(a);
+                        queue.push({ addr: a, hop: hop + 1 });
+                        if (known.size >= maxAddrs) break;
                     }
                 }
-                processed += batch.length;
             }
-            console.log(`  ${addr}: scanned ${processed} txs${truncated ? ' (capped)' : ''} — cluster ${known.size}`);
+            scanned += batch.length;
         }
-        frontier = next;
+        console.log(`  ${addr} (hop ${hop}): scanned ${scanned} txs${truncated ? ' (capped)' : ''} — cluster ${known.size}, queue ${queue.length}`);
+        if (++sinceCheckpoint >= CHECKPOINT_EVERY) { checkpoint(); sinceCheckpoint = 0; }
     }
+    checkpoint(true);
 
     const cluster = [...known].sort();
     console.log(`\nCluster: ${cluster.length} address(es)` + (known.size >= maxAddrs ? ' (hit --max-addrs)' : ''));
@@ -149,6 +198,7 @@ async function main() {
         console.log(`  ${a}${c === Infinity ? '  (seed)' : `  (${c} co-spends)`}${skipped.has(a) ? ' [history capped]' : ''}`);
     }
     if (cluster.length > 40) console.log(`  … +${cluster.length - 40} more`);
+    if (outPath) console.log(`\nWrote ${cluster.length} addresses to ${outPath}`);
 
     if (mergeName) {
         const data = existsSync(OUT_PATH)
