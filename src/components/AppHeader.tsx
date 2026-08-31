@@ -27,6 +27,9 @@ export function AppHeader() {
                         <Link href="/">Analyze</Link>
                     </Button>
                     <Button variant="ghost" size="sm" asChild>
+                        <Link href="/pools">Pools</Link>
+                    </Button>
+                    <Button variant="ghost" size="sm" asChild>
                         <a
                             href="https://radiantblockchain.org"
                             target="_blank"

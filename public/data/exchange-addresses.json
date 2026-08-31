@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-08-31T10:50:07.810Z",
+  "lastUpdated": "2026-08-31T13:12:15.916Z",
   "_comment": "Known Radiant (RXD) entity addresses. Populate with exchange deposit/hot wallets, mining pool payout addresses, and service addresses as they are identified.",
   "exchanges": {
     "CoinEx": {
@@ -5301,61 +5301,6 @@
       "lastSeen": 450859,
       "source": "coinbase-scan"
     },
-    "unknown-12bu6Vu6Vb": {
-      "name": "Unknown pool (12bu6Vu6Vb…)",
-      "confidence": 0.5,
-      "addresses": [
-        "12bu6Vu6Vb5onEJr3HTBuJ66MG7sa9rzGu"
-      ],
-      "blocks": 40,
-      "firstSeen": 440017,
-      "lastSeen": 453972,
-      "source": "coinbase-scan-untagged"
-    },
-    "unknown-1PJrWyj7RA": {
-      "name": "Unknown pool (1PJrWyj7RA…)",
-      "confidence": 0.5,
-      "addresses": [
-        "1PJrWyj7RAvE1JLd6yYfQw3cDCSzasnbpH"
-      ],
-      "blocks": 30,
-      "firstSeen": 451684,
-      "lastSeen": 459703,
-      "source": "coinbase-scan-untagged"
-    },
-    "unknown-19JdxT6qYy": {
-      "name": "Unknown pool (19JdxT6qYy…)",
-      "confidence": 0.5,
-      "addresses": [
-        "19JdxT6qYyQ2u1CFVjiriVoHfa1xEWhvky"
-      ],
-      "blocks": 22,
-      "firstSeen": 449709,
-      "lastSeen": 459201,
-      "source": "coinbase-scan-untagged"
-    },
-    "unknown-1EpHKkmJWF": {
-      "name": "Unknown pool (1EpHKkmJWF…)",
-      "confidence": 0.5,
-      "addresses": [
-        "1EpHKkmJWF4CrDwDmRadQddh8ozM2ptp2s"
-      ],
-      "blocks": 21,
-      "firstSeen": 441053,
-      "lastSeen": 459743,
-      "source": "coinbase-scan-untagged"
-    },
-    "unknown-14XmXG3dSB": {
-      "name": "Unknown pool (14XmXG3dSB…)",
-      "confidence": 0.5,
-      "addresses": [
-        "14XmXG3dSBWZUukGT3xzS9zxpiZ53vgx1i"
-      ],
-      "blocks": 9,
-      "firstSeen": 440624,
-      "lastSeen": 456819,
-      "source": "coinbase-scan-untagged"
-    },
     "HumPool": {
       "name": "HumPool",
       "link": "https://humpool.com/",
@@ -5379,6 +5324,66 @@
       "firstSeen": 0,
       "lastSeen": 0,
       "source": "coinbase-scan"
+    },
+    "solo-14XmXG3dSB": {
+      "name": "Solo miner",
+      "confidence": 0.9,
+      "addresses": [
+        "14XmXG3dSBWZUukGT3xzS9zxpiZ53vgx1i"
+      ],
+      "blocks": 9,
+      "firstSeen": 440624,
+      "lastSeen": 456819,
+      "source": "Solo miner (self-identified, open-source solo miner software; individual, not a pool).",
+      "solo": true
+    },
+    "WoolyPooly": {
+      "name": "WoolyPooly",
+      "link": "https://woolypooly.com",
+      "confidence": 0.9,
+      "addresses": [
+        "1EpHKkmJWF4CrDwDmRadQddh8ozM2ptp2s"
+      ],
+      "blocks": 21,
+      "firstSeen": 441053,
+      "lastSeen": 459743,
+      "source": "Identified by operator. Direct-payout pool (1400+ distinct miners)."
+    },
+    "solo-12bu6Vu6Vb": {
+      "name": "Solo miner",
+      "solo": true,
+      "confidence": 0.9,
+      "addresses": [
+        "12bu6Vu6Vb5onEJr3HTBuJ66MG7sa9rzGu"
+      ],
+      "blocks": 40,
+      "firstSeen": 440017,
+      "lastSeen": 453972,
+      "source": "Solo miner (open-source solo miner software; individual, not a pool)."
+    },
+    "solo-1PJrWyj7RA": {
+      "name": "Solo miner",
+      "solo": true,
+      "confidence": 0.9,
+      "addresses": [
+        "1PJrWyj7RAvE1JLd6yYfQw3cDCSzasnbpH"
+      ],
+      "blocks": 30,
+      "firstSeen": 451684,
+      "lastSeen": 459703,
+      "source": "Solo miner (open-source solo miner software; individual, not a pool)."
+    },
+    "solo-19JdxT6qYy": {
+      "name": "Solo miner",
+      "solo": true,
+      "confidence": 0.9,
+      "addresses": [
+        "19JdxT6qYyQ2u1CFVjiriVoHfa1xEWhvky"
+      ],
+      "blocks": 22,
+      "firstSeen": 449709,
+      "lastSeen": 459201,
+      "source": "Solo miner (open-source solo miner software; individual, not a pool)."
     }
   },
   "services": {}

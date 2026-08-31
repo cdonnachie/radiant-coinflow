@@ -1,0 +1,796 @@
+{
+  "generatedAt": "2026-08-31T13:12:31.439Z",
+  "windowMaxTxs": 1500,
+  "pools": [
+    {
+      "key": "ZergPool",
+      "name": "ZergPool",
+      "link": "https://zergpool.com/",
+      "addresses": 1,
+      "scanned": 1502,
+      "totalTx": 1683,
+      "windowStart": 1670798318,
+      "windowEnd": 1758993726,
+      "rewardBlocks": 959,
+      "rewardRxd": 46925655.89741054,
+      "payoutEvents": 543,
+      "avgIntervalHours": 44.979862648626515,
+      "medianRecipients": 2,
+      "pattern": "consolidation",
+      "patternText": "consolidation / pay-from-elsewhere (median 2 recipients)",
+      "recent": [
+        {
+          "height": 362832,
+          "ts": 1758563026,
+          "recipients": 2,
+          "rxdOut": 50000.473183919996
+        },
+        {
+          "height": 361869,
+          "ts": 1758291097,
+          "recipients": 2,
+          "rxdOut": 50000.36857202
+        },
+        {
+          "height": 360269,
+          "ts": 1757803035,
+          "recipients": 2,
+          "rxdOut": 51038.02018883
+        },
+        {
+          "height": 357789,
+          "ts": 1757065890,
+          "recipients": 2,
+          "rxdOut": 75000.79746
+        },
+        {
+          "height": 354383,
+          "ts": 1756078813,
+          "recipients": 2,
+          "rxdOut": 75000.35249
+        },
+        {
+          "height": 350089,
+          "ts": 1754895636,
+          "recipients": 2,
+          "rxdOut": 67163.29924033
+        },
+        {
+          "height": 348722,
+          "ts": 1754451157,
+          "recipients": 2,
+          "rxdOut": 25000.72988
+        },
+        {
+          "height": 340181,
+          "ts": 1751909426,
+          "recipients": 2,
+          "rxdOut": 75000.30961
+        },
+        {
+          "height": 331274,
+          "ts": 1749070126,
+          "recipients": 2,
+          "rxdOut": 74163.71728236
+        },
+        {
+          "height": 327911,
+          "ts": 1748201432,
+          "recipients": 2,
+          "rxdOut": 25000.215099999998
+        }
+      ]
+    },
+    {
+      "key": "WoolyPooly",
+      "name": "WoolyPooly",
+      "link": "https://woolypooly.com",
+      "addresses": 1,
+      "scanned": 1502,
+      "totalTx": 99899,
+      "windowStart": 1713186623,
+      "windowEnd": 1788025027,
+      "rewardBlocks": 811,
+      "rewardRxd": 22638567.675726667,
+      "payoutEvents": 690,
+      "avgIntervalHours": 30.171909369456564,
+      "medianRecipients": 29,
+      "pattern": "direct",
+      "patternText": "direct payout to miners (median 29 recipients)",
+      "recent": [
+        {
+          "height": 459757,
+          "ts": 1788025027,
+          "recipients": 2,
+          "rxdOut": 12500.138915
+        },
+        {
+          "height": 459432,
+          "ts": 1787928254,
+          "recipients": 2,
+          "rxdOut": 12500.69915
+        },
+        {
+          "height": 456276,
+          "ts": 1786975930,
+          "recipients": 2,
+          "rxdOut": 12500.818235
+        },
+        {
+          "height": 456185,
+          "ts": 1786949204,
+          "recipients": 2,
+          "rxdOut": 12500.500505
+        },
+        {
+          "height": 455319,
+          "ts": 1786690237,
+          "recipients": 2,
+          "rxdOut": 12500.5939
+        },
+        {
+          "height": 455108,
+          "ts": 1786630904,
+          "recipients": 2,
+          "rxdOut": 12500.229619999998
+        },
+        {
+          "height": 454278,
+          "ts": 1786382726,
+          "recipients": 2,
+          "rxdOut": 12500.340815
+        },
+        {
+          "height": 452496,
+          "ts": 1785841007,
+          "recipients": 2,
+          "rxdOut": 12500.313114999999
+        },
+        {
+          "height": 449611,
+          "ts": 1784973345,
+          "recipients": 2,
+          "rxdOut": 12500.164999999999
+        },
+        {
+          "height": 449513,
+          "ts": 1784942500,
+          "recipients": 3,
+          "rxdOut": 12500.0763
+        }
+      ]
+    },
+    {
+      "key": "HumPool",
+      "name": "HumPool",
+      "link": "https://humpool.com/",
+      "addresses": 1,
+      "scanned": 1500,
+      "totalTx": 67727,
+      "windowStart": 1755727676,
+      "windowEnd": 1762393058,
+      "rewardBlocks": 802,
+      "rewardRxd": 20050296.868712403,
+      "payoutEvents": 698,
+      "avgIntervalHours": 2.6563773314203725,
+      "medianRecipients": 2,
+      "pattern": "consolidation",
+      "patternText": "consolidation / pay-from-elsewhere (median 2 recipients)",
+      "recent": [
+        {
+          "height": 375746,
+          "ts": 1762393058,
+          "recipients": 2,
+          "rxdOut": 3639791.1190434
+        },
+        {
+          "height": 374802,
+          "ts": 1762136395,
+          "recipients": 2,
+          "rxdOut": 291593.15291858
+        },
+        {
+          "height": 371325,
+          "ts": 1761084599,
+          "recipients": 2,
+          "rxdOut": 311586.15315416997
+        },
+        {
+          "height": 368116,
+          "ts": 1760134062,
+          "recipients": 2,
+          "rxdOut": 54207.27879164
+        },
+        {
+          "height": 368116,
+          "ts": 1760134062,
+          "recipients": 2,
+          "rxdOut": 300877.54484808
+        },
+        {
+          "height": 367970,
+          "ts": 1760091055,
+          "recipients": 2,
+          "rxdOut": 25000.0648
+        },
+        {
+          "height": 367970,
+          "ts": 1760091055,
+          "recipients": 2,
+          "rxdOut": 25000.04161
+        },
+        {
+          "height": 367970,
+          "ts": 1760091055,
+          "recipients": 2,
+          "rxdOut": 25000.03574
+        },
+        {
+          "height": 367970,
+          "ts": 1760091055,
+          "recipients": 2,
+          "rxdOut": 25000.03417
+        },
+        {
+          "height": 367970,
+          "ts": 1760091055,
+          "recipients": 2,
+          "rxdOut": 25000.002249999998
+        }
+      ]
+    },
+    {
+      "key": "M2Pool",
+      "name": "M2Pool",
+      "link": "https://m2pool.com/",
+      "addresses": 1,
+      "scanned": 1575,
+      "totalTx": 84943,
+      "windowStart": 1787389572,
+      "windowEnd": 1788180951,
+      "rewardBlocks": 1559,
+      "rewardRxd": 19488785.737353917,
+      "payoutEvents": 16,
+      "avgIntervalHours": 14.411648148148148,
+      "medianRecipients": 2,
+      "pattern": "consolidation",
+      "patternText": "consolidation / pay-from-elsewhere (median 2 recipients)",
+      "recent": [
+        {
+          "height": 460228,
+          "ts": 1788167801,
+          "recipients": 2,
+          "rxdOut": 160936.22603519
+        },
+        {
+          "height": 460227,
+          "ts": 1788167593,
+          "recipients": 5,
+          "rxdOut": 6287741.61504519
+        },
+        {
+          "height": 460131,
+          "ts": 1788142204,
+          "recipients": 1,
+          "rxdOut": 5750229.60344519
+        },
+        {
+          "height": 459354,
+          "ts": 1787909476,
+          "recipients": 2,
+          "rxdOut": 50938.09534529
+        },
+        {
+          "height": 459353,
+          "ts": 1787909078,
+          "recipients": 5,
+          "rxdOut": 1987599.1851901002
+        },
+        {
+          "height": 459075,
+          "ts": 1787822071,
+          "recipients": 2,
+          "rxdOut": 52503.94132771
+        },
+        {
+          "height": 459074,
+          "ts": 1787821601,
+          "recipients": 4,
+          "rxdOut": 2050109.22732771
+        },
+        {
+          "height": 458794,
+          "ts": 1787735095,
+          "recipients": 2,
+          "rxdOut": 47196.2842746
+        },
+        {
+          "height": 458793,
+          "ts": 1787734853,
+          "recipients": 4,
+          "rxdOut": 1850162.3558746001
+        },
+        {
+          "height": 458518,
+          "ts": 1787650932,
+          "recipients": 2,
+          "rxdOut": 56568.90669648
+        }
+      ]
+    },
+    {
+      "key": "ZPool",
+      "name": "ZPool",
+      "link": "https://zpool.ca/",
+      "addresses": 1,
+      "scanned": 908,
+      "totalTx": 908,
+      "windowStart": 1664083637,
+      "windowEnd": 1788154250,
+      "rewardBlocks": 539,
+      "rewardRxd": 12025709.311408846,
+      "payoutEvents": 369,
+      "avgIntervalHours": 93.42959692028988,
+      "medianRecipients": 2,
+      "pattern": "consolidation",
+      "patternText": "consolidation / pay-from-elsewhere (median 2 recipients)",
+      "recent": [
+        {
+          "height": 459293,
+          "ts": 1787889693,
+          "recipients": 2,
+          "rxdOut": 12500
+        },
+        {
+          "height": 458307,
+          "ts": 1787585289,
+          "recipients": 4,
+          "rxdOut": 12500.58563
+        },
+        {
+          "height": 458194,
+          "ts": 1787556500,
+          "recipients": 4,
+          "rxdOut": 12500.448554999999
+        },
+        {
+          "height": 457850,
+          "ts": 1787454666,
+          "recipients": 3,
+          "rxdOut": 12503.104210000001
+        },
+        {
+          "height": 457651,
+          "ts": 1787396589,
+          "recipients": 6,
+          "rxdOut": 25002.737784999998
+        },
+        {
+          "height": 457555,
+          "ts": 1787367560,
+          "recipients": 4,
+          "rxdOut": 12500.2741
+        },
+        {
+          "height": 456233,
+          "ts": 1786960569,
+          "recipients": 4,
+          "rxdOut": 12500.9776
+        },
+        {
+          "height": 455872,
+          "ts": 1786859293,
+          "recipients": 4,
+          "rxdOut": 12500.72206
+        },
+        {
+          "height": 455720,
+          "ts": 1786816416,
+          "recipients": 4,
+          "rxdOut": 12500.44743
+        },
+        {
+          "height": 455491,
+          "ts": 1786743187,
+          "recipients": 4,
+          "rxdOut": 12500.038199999999
+        }
+      ]
+    },
+    {
+      "key": "K1Pool",
+      "name": "K1Pool",
+      "link": "https://k1pool.com/",
+      "addresses": 1,
+      "scanned": 1500,
+      "totalTx": 44006,
+      "windowStart": 1786015896,
+      "windowEnd": 1788178380,
+      "rewardBlocks": 956,
+      "rewardRxd": 11951131.164051253,
+      "payoutEvents": 544,
+      "avgIntervalHours": 1.104795375485983,
+      "medianRecipients": 5,
+      "pattern": "consolidation",
+      "patternText": "consolidation / pay-from-elsewhere (median 5 recipients)",
+      "recent": [
+        {
+          "height": 460250,
+          "ts": 1788175550,
+          "recipients": 4,
+          "rxdOut": 12500.038199999999
+        },
+        {
+          "height": 460245,
+          "ts": 1788174043,
+          "recipients": 6,
+          "rxdOut": 28045.068868280003
+        },
+        {
+          "height": 460242,
+          "ts": 1788172963,
+          "recipients": 2,
+          "rxdOut": 12500.204825
+        },
+        {
+          "height": 460233,
+          "ts": 1788170233,
+          "recipients": 6,
+          "rxdOut": 12500.0314
+        },
+        {
+          "height": 460229,
+          "ts": 1788168419,
+          "recipients": 6,
+          "rxdOut": 18723.59746591
+        },
+        {
+          "height": 460211,
+          "ts": 1788161630,
+          "recipients": 2,
+          "rxdOut": 12500.203880000001
+        },
+        {
+          "height": 460179,
+          "ts": 1788154041,
+          "recipients": 4,
+          "rxdOut": 12500.1957
+        },
+        {
+          "height": 460167,
+          "ts": 1788152059,
+          "recipients": 8,
+          "rxdOut": 31528.569248120002
+        },
+        {
+          "height": 460157,
+          "ts": 1788150278,
+          "recipients": 4,
+          "rxdOut": 25001.797185000003
+        },
+        {
+          "height": 460140,
+          "ts": 1788144869,
+          "recipients": 5,
+          "rxdOut": 20029.535678610002
+        }
+      ]
+    },
+    {
+      "key": "Kryptex",
+      "name": "Kryptex",
+      "link": "https://pool.kryptex.com",
+      "addresses": 1,
+      "scanned": 1501,
+      "totalTx": 8978,
+      "windowStart": 1780683937,
+      "windowEnd": 1788179545,
+      "rewardBlocks": 864,
+      "rewardRxd": 10804459.367300093,
+      "payoutEvents": 637,
+      "avgIntervalHours": 3.271652253668762,
+      "medianRecipients": 16,
+      "pattern": "consolidation",
+      "patternText": "consolidation / pay-from-elsewhere (median 16 recipients)",
+      "recent": [
+        {
+          "height": 460248,
+          "ts": 1788174712,
+          "recipients": 12,
+          "rxdOut": 12500.013009999999
+        },
+        {
+          "height": 460206,
+          "ts": 1788160059,
+          "recipients": 12,
+          "rxdOut": 12500.238115
+        },
+        {
+          "height": 460098,
+          "ts": 1788131315,
+          "recipients": 14,
+          "rxdOut": 12500.096525
+        },
+        {
+          "height": 460071,
+          "ts": 1788124110,
+          "recipients": 14,
+          "rxdOut": 12500.1627
+        },
+        {
+          "height": 460059,
+          "ts": 1788120633,
+          "recipients": 13,
+          "rxdOut": 12500.1669
+        },
+        {
+          "height": 460037,
+          "ts": 1788113242,
+          "recipients": 15,
+          "rxdOut": 22796.02792435
+        },
+        {
+          "height": 460018,
+          "ts": 1788106559,
+          "recipients": 13,
+          "rxdOut": 12500.10003
+        },
+        {
+          "height": 459937,
+          "ts": 1788081410,
+          "recipients": 13,
+          "rxdOut": 25000.697929999995
+        },
+        {
+          "height": 459926,
+          "ts": 1788077610,
+          "recipients": 13,
+          "rxdOut": 12500.122215
+        },
+        {
+          "height": 459902,
+          "ts": 1788070262,
+          "recipients": 14,
+          "rxdOut": 25000.543515
+        }
+      ]
+    },
+    {
+      "key": "Vipor",
+      "name": "Vipor",
+      "link": "https://vipor.net",
+      "addresses": 1,
+      "scanned": 1501,
+      "totalTx": 233815,
+      "windowStart": 1786745567,
+      "windowEnd": 1788180772,
+      "rewardBlocks": 852,
+      "rewardRxd": 10650891.367710268,
+      "payoutEvents": 649,
+      "avgIntervalHours": 0.6151037379972565,
+      "medianRecipients": 42,
+      "pattern": "direct",
+      "patternText": "direct payout to miners (median 42 recipients)",
+      "recent": [
+        {
+          "height": 460267,
+          "ts": 1788180481,
+          "recipients": 2,
+          "rxdOut": 12500.09
+        },
+        {
+          "height": 460264,
+          "ts": 1788179545,
+          "recipients": 88,
+          "rxdOut": 50005.99652001
+        },
+        {
+          "height": 460229,
+          "ts": 1788168419,
+          "recipients": 56,
+          "rxdOut": 14678.13641005
+        },
+        {
+          "height": 460221,
+          "ts": 1788163875,
+          "recipients": 2,
+          "rxdOut": 12500.2025
+        },
+        {
+          "height": 460217,
+          "ts": 1788163443,
+          "recipients": 2,
+          "rxdOut": 12500.248265
+        },
+        {
+          "height": 460209,
+          "ts": 1788160347,
+          "recipients": 2,
+          "rxdOut": 12500
+        },
+        {
+          "height": 460209,
+          "ts": 1788160347,
+          "recipients": 39,
+          "rxdOut": 12500.076699999998
+        },
+        {
+          "height": 460184,
+          "ts": 1788154820,
+          "recipients": 48,
+          "rxdOut": 25002.070265000002
+        },
+        {
+          "height": 460171,
+          "ts": 1788152419,
+          "recipients": 46,
+          "rxdOut": 25002.285514999996
+        },
+        {
+          "height": 460161,
+          "ts": 1788150594,
+          "recipients": 48,
+          "rxdOut": 37504.328575
+        }
+      ]
+    },
+    {
+      "key": "WhalePool",
+      "name": "WhalePool",
+      "link": "https://whalepool.com/",
+      "addresses": 1,
+      "scanned": 1504,
+      "totalTx": 13390,
+      "windowStart": 1784542140,
+      "windowEnd": 1788179727,
+      "rewardBlocks": 771,
+      "rewardRxd": 9638417.900843238,
+      "payoutEvents": 733,
+      "avgIntervalHours": 1.3770495598057073,
+      "medianRecipients": 2,
+      "pattern": "consolidation",
+      "patternText": "consolidation / pay-from-elsewhere (median 2 recipients)",
+      "recent": [
+        {
+          "height": 460235,
+          "ts": 1788170941,
+          "recipients": 2,
+          "rxdOut": 12500.388845
+        },
+        {
+          "height": 460235,
+          "ts": 1788170941,
+          "recipients": 2,
+          "rxdOut": 12500.38664
+        },
+        {
+          "height": 460235,
+          "ts": 1788170941,
+          "recipients": 2,
+          "rxdOut": 12500.37438
+        },
+        {
+          "height": 460235,
+          "ts": 1788170941,
+          "recipients": 2,
+          "rxdOut": 12500.34194
+        },
+        {
+          "height": 460235,
+          "ts": 1788170941,
+          "recipients": 2,
+          "rxdOut": 12500.34152
+        },
+        {
+          "height": 460235,
+          "ts": 1788170941,
+          "recipients": 2,
+          "rxdOut": 12500.31902
+        },
+        {
+          "height": 460235,
+          "ts": 1788170941,
+          "recipients": 2,
+          "rxdOut": 12500.30041
+        },
+        {
+          "height": 460235,
+          "ts": 1788170941,
+          "recipients": 2,
+          "rxdOut": 12500.295785
+        },
+        {
+          "height": 460235,
+          "ts": 1788170941,
+          "recipients": 2,
+          "rxdOut": 12500.272429999999
+        },
+        {
+          "height": 460235,
+          "ts": 1788170941,
+          "recipients": 2,
+          "rxdOut": 12500.137745
+        }
+      ]
+    },
+    {
+      "key": "Idyllic Mining",
+      "name": "Idyllic Mining",
+      "link": "https://icminers.com/",
+      "addresses": 2,
+      "scanned": 746,
+      "totalTx": 746,
+      "windowStart": 1766213013,
+      "windowEnd": 1785391697,
+      "rewardBlocks": 386,
+      "rewardRxd": 8038076.757920749,
+      "payoutEvents": 358,
+      "avgIntervalHours": 14.801923436041102,
+      "medianRecipients": 3,
+      "pattern": "consolidation",
+      "patternText": "consolidation / pay-from-elsewhere (median 3 recipients)",
+      "recent": [
+        {
+          "height": 450971,
+          "ts": 1785391697,
+          "recipients": 2,
+          "rxdOut": 12500.687480019998
+        },
+        {
+          "height": 450693,
+          "ts": 1785305933,
+          "recipients": 2,
+          "rxdOut": 12500.756440019999
+        },
+        {
+          "height": 450656,
+          "ts": 1785294426,
+          "recipients": 2,
+          "rxdOut": 12501.59244
+        },
+        {
+          "height": 450226,
+          "ts": 1785153291,
+          "recipients": 2,
+          "rxdOut": 12501.574265
+        },
+        {
+          "height": 449991,
+          "ts": 1785088563,
+          "recipients": 2,
+          "rxdOut": 12502.828185
+        },
+        {
+          "height": 449949,
+          "ts": 1785077721,
+          "recipients": 2,
+          "rxdOut": 12502.865415
+        },
+        {
+          "height": 449586,
+          "ts": 1784962965,
+          "recipients": 2,
+          "rxdOut": 12502.902605
+        },
+        {
+          "height": 449367,
+          "ts": 1784900124,
+          "recipients": 4,
+          "rxdOut": 12561.11936556
+        },
+        {
+          "height": 449277,
+          "ts": 1784872642,
+          "recipients": 4,
+          "rxdOut": 12500.470185000002
+        },
+        {
+          "height": 449183,
+          "ts": 1784843803,
+          "recipients": 2,
+          "rxdOut": 12561.20466556
+        }
+      ]
+    }
+  ]
+}
