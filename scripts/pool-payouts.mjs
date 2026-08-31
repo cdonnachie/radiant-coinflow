@@ -75,6 +75,7 @@ async function analyzePool(name, entry) {
     let rewardCount = 0, rewardRxd = 0, totalTx = 0, scanned = 0;
     let earliest = Infinity, latest = 0;
     const payouts = [];
+    const destCounts = new Map(); // outbound destination addr -> { count, rxd }
 
     for (const address of entry.addresses) {
         let offset = 0;
@@ -95,7 +96,13 @@ async function analyzePool(name, entry) {
                 let rxdOut = 0;
                 tx.vout.forEach((o, n) => {
                     const a = outAddr(tx, n);
-                    if (a && !poolSet.has(a)) { recipients.add(a); rxdOut += o.value || 0; }
+                    if (a && !poolSet.has(a)) {
+                        recipients.add(a);
+                        rxdOut += o.value || 0;
+                        const d = destCounts.get(a) ?? { count: 0, rxd: 0 };
+                        d.count++; d.rxd += o.value || 0;
+                        destCounts.set(a, d);
+                    }
                 });
                 payouts.push({ height: h.height, ts: h.timestamp, recipients: recipients.size, rxdOut });
                 if (scanned >= MAX_HISTORY) break;
@@ -116,11 +123,26 @@ async function analyzePool(name, entry) {
         : patternKind === 'direct' ? `direct payout to miners (median ${medianRecip} recipients)`
         : `consolidation / pay-from-elsewhere (median ${medianRecip} recipients)`;
 
+    // For consolidating pools, the recurring outbound destination(s) are the
+    // consolidation wallet the pool sweeps into before paying miners. Keep the
+    // ones that receive from a meaningful share of outbound txs (drops one-off
+    // exchange sends); direct-payout pools have no single such destination.
+    const consolidatesTo = patternKind === 'consolidation'
+        ? [...destCounts.entries()]
+            .filter(([, d]) => d.count >= Math.max(3, payouts.length * 0.2))
+            .sort((a, b) => b[1].count - a[1].count)
+            .slice(0, 3)
+            .map(([address, d]) => ({ address, txCount: d.count, rxd: d.rxd }))
+        : [];
+
     console.log(`\n=== ${name}${entry.link ? '  ' + entry.link : ''} ===`);
     console.log(`  scanned ${scanned} of ~${totalTx} txs${scanned && latest ? `, ${fmtDate(earliest)} → ${fmtDate(latest)} UTC` : ''}`);
     console.log(`  coinbase rewards in window: ${rewardCount} blocks, ${rewardRxd.toFixed(2)} RXD`);
     console.log(`  outbound events: ${payouts.length}${avgGap != null ? `, ~every ${avgGap.toFixed(1)}h` : ''}`);
     console.log(`  pattern: ${patternText}`);
+    if (consolidatesTo.length) {
+        console.log(`  consolidates to: ${consolidatesTo.map((c) => `${c.address} (${c.txCount}×)`).join(', ')}`);
+    }
     for (const p of payouts.slice(0, RECENT)) {
         console.log(`    ${fmtDate(p.ts)} UTC  block ${p.height}  ${String(p.recipients).padStart(4)} recipients  ${p.rxdOut.toFixed(2)} RXD`);
     }
@@ -131,6 +153,7 @@ async function analyzePool(name, entry) {
         rewardBlocks: rewardCount, rewardRxd,
         payoutEvents: payouts.length, avgIntervalHours: avgGap,
         medianRecipients: medianRecip, pattern: patternKind, patternText,
+        consolidatesTo,
         recent: payouts.slice(0, RECENT),
     };
 }

@@ -28,6 +28,7 @@ interface PoolSummary {
     medianRecipients: number;
     pattern: 'direct' | 'consolidation' | 'none';
     patternText: string;
+    consolidatesTo?: Array<{ address: string; txCount: number; rxd: number }>;
     recent: PayoutEvent[];
 }
 
@@ -131,6 +132,25 @@ export default function PoolsPage() {
                                         <div className="text-xs text-muted-foreground">median / payout</div>
                                     </div>
                                 </div>
+
+                                {p.consolidatesTo && p.consolidatesTo.length > 0 && (
+                                    <div>
+                                        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                                            Consolidates to
+                                        </div>
+                                        <div className="space-y-1">
+                                            {p.consolidatesTo.map((c) => (
+                                                <a key={c.address}
+                                                   href={`https://radiantexplorer.com/address/${c.address}`}
+                                                   target="_blank" rel="noopener noreferrer"
+                                                   className="flex items-center justify-between text-xs gap-2 hover:text-primary">
+                                                    <code className="font-mono truncate">{c.address}</code>
+                                                    <span className="text-muted-foreground shrink-0">{c.txCount}×</span>
+                                                </a>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
 
                                 {p.recent.length > 0 && (
                                     <div>

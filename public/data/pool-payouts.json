@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-31T13:43:08.102Z",
+  "generatedAt": "2026-08-31T13:58:56.800Z",
   "windowMaxTxs": 1500,
   "pools": [
     {
@@ -18,6 +18,13 @@
       "medianRecipients": 2,
       "pattern": "consolidation",
       "patternText": "consolidation / pay-from-elsewhere (median 2 recipients)",
+      "consolidatesTo": [
+        {
+          "address": "19KERKV7Rj1ADygQyvx6BdjH2ycCZTf5Yg",
+          "txCount": 182,
+          "rxd": 23445944.82999999
+        }
+      ],
       "recent": [
         {
           "height": 362832,
@@ -97,6 +104,7 @@
       "medianRecipients": 29,
       "pattern": "direct",
       "patternText": "direct payout to miners (median 29 recipients)",
+      "consolidatesTo": [],
       "recent": [
         {
           "height": 459757,
@@ -176,6 +184,7 @@
       "medianRecipients": 2,
       "pattern": "consolidation",
       "patternText": "consolidation / pay-from-elsewhere (median 2 recipients)",
+      "consolidatesTo": [],
       "recent": [
         {
           "height": 375746,
@@ -244,17 +253,34 @@
       "name": "M2Pool",
       "link": "https://m2pool.com/",
       "addresses": 1,
-      "scanned": 1581,
-      "totalTx": 84949,
+      "scanned": 1582,
+      "totalTx": 84950,
       "windowStart": 1787389572,
-      "windowEnd": 1788181775,
-      "rewardBlocks": 1565,
-      "rewardRxd": 19563786.823483914,
+      "windowEnd": 1788183620,
+      "rewardBlocks": 1566,
+      "rewardRxd": 19576286.983323913,
       "payoutEvents": 16,
       "avgIntervalHours": 14.411648148148148,
       "medianRecipients": 2,
       "pattern": "consolidation",
       "patternText": "consolidation / pay-from-elsewhere (median 2 recipients)",
+      "consolidatesTo": [
+        {
+          "address": "15Y6NgvPEXB3dqBgpzP9SuhKT4bWB1uKJi",
+          "txCount": 8,
+          "rxd": 519070.51587411
+        },
+        {
+          "address": "1KzCCkK6k3v8jN2pRSnBeV8FErae83G7FE",
+          "txCount": 7,
+          "rxd": 81901.48
+        },
+        {
+          "address": "1HqWbU8tDjyYUWFncgYhtpApAmXRrSEHDg",
+          "txCount": 7,
+          "rxd": 97886.42000000001
+        }
+      ],
       "recent": [
         {
           "height": 460228,
@@ -334,6 +360,13 @@
       "medianRecipients": 2,
       "pattern": "consolidation",
       "patternText": "consolidation / pay-from-elsewhere (median 2 recipients)",
+      "consolidatesTo": [
+        {
+          "address": "1EVHgj9wpoQdz9MBL8TBV3pHFcR2yiXZLS",
+          "txCount": 180,
+          "rxd": 9138872.104801998
+        }
+      ],
       "recent": [
         {
           "height": 459293,
@@ -403,16 +436,33 @@
       "link": "https://k1pool.com/",
       "addresses": 1,
       "scanned": 1502,
-      "totalTx": 44008,
-      "windowStart": 1786015896,
-      "windowEnd": 1788182644,
-      "rewardBlocks": 957,
-      "rewardRxd": 11963631.801196253,
-      "payoutEvents": 545,
-      "avgIntervalHours": 1.1063868464052287,
+      "totalTx": 44012,
+      "windowStart": 1786022737,
+      "windowEnd": 1788184277,
+      "rewardBlocks": 958,
+      "rewardRxd": 11976130.644026255,
+      "payoutEvents": 544,
+      "avgIntervalHours": 1.1049248004910988,
       "medianRecipients": 5,
       "pattern": "consolidation",
       "patternText": "consolidation / pay-from-elsewhere (median 5 recipients)",
+      "consolidatesTo": [
+        {
+          "address": "1TdNAih1S72LeWM7bvkdcQ3uFoAxPH9zE",
+          "txCount": 243,
+          "rxd": 1681034.6999596385
+        },
+        {
+          "address": "16mrCej8Rk3AdFCgizCa8z4U6dKYdV8ria",
+          "txCount": 230,
+          "rxd": 305846.1393269101
+        },
+        {
+          "address": "1Jjmd2kR6HTMu2gCGfAyn8s9bVojYJL91C",
+          "txCount": 186,
+          "rxd": 380503.01548828
+        }
+      ],
       "recent": [
         {
           "height": 460282,
@@ -492,6 +542,23 @@
       "medianRecipients": 16,
       "pattern": "consolidation",
       "patternText": "consolidation / pay-from-elsewhere (median 16 recipients)",
+      "consolidatesTo": [
+        {
+          "address": "1DhCcHzGXCmfvHXeEEL3fhQH5UgvLYL3d5",
+          "txCount": 614,
+          "rxd": 4261116.951826718
+        },
+        {
+          "address": "1J9zg9YgRe2hRNckAJ5P4GP8B5apjuRjyL",
+          "txCount": 589,
+          "rxd": 177739.53922924993
+        },
+        {
+          "address": "1zaQ2RqzzrEPQx5ozTNxcBMYfyRm5TRRH",
+          "txCount": 589,
+          "rxd": 350474.1106942197
+        }
+      ],
       "recent": [
         {
           "height": 460279,
@@ -571,6 +638,7 @@
       "medianRecipients": 42,
       "pattern": "direct",
       "patternText": "direct payout to miners (median 42 recipients)",
+      "consolidatesTo": [],
       "recent": [
         {
           "height": 460281,
@@ -650,6 +718,7 @@
       "medianRecipients": 2,
       "pattern": "consolidation",
       "patternText": "consolidation / pay-from-elsewhere (median 2 recipients)",
+      "consolidatesTo": [],
       "recent": [
         {
           "height": 460235,
@@ -729,6 +798,23 @@
       "medianRecipients": 3,
       "pattern": "consolidation",
       "patternText": "consolidation / pay-from-elsewhere (median 3 recipients)",
+      "consolidatesTo": [
+        {
+          "address": "1FTYNR213wX7X94qJeFXqirBkFgQrzMX8H",
+          "txCount": 184,
+          "rxd": 1965547.1382003098
+        },
+        {
+          "address": "1M5vUJ4WptpqF8hWX8akTgFi3Sn7snukY1",
+          "txCount": 178,
+          "rxd": 8964.9486
+        },
+        {
+          "address": "142swP9vpvoGXkZWkdPjwyyvEzMNnqNvi4",
+          "txCount": 124,
+          "rxd": 2006808.8319999997
+        }
+      ],
       "recent": [
         {
           "height": 450971,
@@ -808,6 +894,23 @@
       "medianRecipients": 2,
       "pattern": "consolidation",
       "patternText": "consolidation / pay-from-elsewhere (median 2 recipients)",
+      "consolidatesTo": [
+        {
+          "address": "1FTYNR213wX7X94qJeFXqirBkFgQrzMX8H",
+          "txCount": 18,
+          "rxd": 205413.49825000006
+        },
+        {
+          "address": "114jppPPPgci49NFR5mTqLJYtFcaxKxHsF",
+          "txCount": 16,
+          "rxd": 168392.28635
+        },
+        {
+          "address": "1MJsgNtKQcBH1SrCzww5MUXU3VmHXqvAub",
+          "txCount": 11,
+          "rxd": 137514.74860000002
+        }
+      ],
       "recent": [
         {
           "height": 460227,
