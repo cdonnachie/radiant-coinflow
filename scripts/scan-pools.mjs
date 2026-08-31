@@ -117,21 +117,38 @@ socket.on('error', (e) => { console.error('socket error:', e.message); process.e
 
 // ------------------------------------------------------------- tag parsing
 
-/** Extracts a pool tag (domain) from coinbase scriptSig hex, or null. */
-function extractPoolTag(coinbaseHex) {
+/** Printable-ASCII runs (>=4 chars) from coinbase scriptSig hex. */
+function coinbaseRuns(coinbaseHex) {
     const bytes = Buffer.from(coinbaseHex, 'hex');
-    let runs = [], run = '';
+    const runs = [];
+    let run = '';
     for (const b of bytes) {
         if (b >= 0x20 && b <= 0x7e) run += String.fromCharCode(b);
         else { if (run.length >= 4) runs.push(run); run = ''; }
     }
     if (run.length >= 4) runs.push(run);
+    return runs;
+}
 
-    for (const r of runs) {
+/** Extracts a pool tag (domain) from coinbase scriptSig hex, or null. */
+function extractPoolTag(coinbaseHex) {
+    for (const r of coinbaseRuns(coinbaseHex)) {
         const m = r.match(/([a-z0-9][a-z0-9-]*\.)+[a-z]{2,}/i);
         if (m) return m[0].toLowerCase();
     }
     return null;
+}
+
+/**
+ * Solo-miner signature: the open-source radiant stratum proxy embeds a
+ * "<name>-stratum-proxy" coinbase tag — default "radiant-stratum-proxy", or a
+ * customized prefix like "craigd-stratum-proxy". Matching "stratum-proxy"
+ * auto-detects solo miners on the default and common variants (a far better
+ * default than mislabeling them "Unknown pool"). The tag is configurable, so a
+ * fully-custom string won't match and still needs manual identification.
+ */
+function hasSoloSignature(coinbaseHex) {
+    return coinbaseRuns(coinbaseHex).some((r) => /stratum-proxy/i.test(r));
 }
 
 // ------------------------------------------------------------------- scan
@@ -182,7 +199,9 @@ async function scan() {
             stats.firstSeen = Math.min(stats.firstSeen, height);
             stats.lastSeen = Math.max(stats.lastSeen, height);
 
-            const tag = extractPoolTag(tx.vin?.[0]?.coinbase ?? '');
+            const coinbase = tx.vin?.[0]?.coinbase ?? '';
+            if (hasSoloSignature(coinbase)) stats.soloBlocks = (stats.soloBlocks ?? 0) + 1;
+            const tag = extractPoolTag(coinbase);
             if (tag) {
                 stats.tags.set(tag, (stats.tags.get(tag) ?? 0) + 1);
                 tagTotals.set(tag, (tagTotals.get(tag) ?? 0) + 1);
@@ -200,9 +219,15 @@ async function scan() {
 // ------------------------------------------------------------------ group
 
 function buildPoolEntries({ addrStats, tagTotals }) {
-    // Resolve each mining address to a pool identity
+    // Resolve each mining address to an identity. Curated names win; then the
+    // solo-miner signature; then a decoded pool domain tag.
     function resolve(addr, stats) {
         if (curated[addr]) return { ...curated[addr], confidence: 0.95 };
+        // Majority of this address's coinbases carry the stratum-proxy signature
+        // → solo miner, not a pool.
+        if (stats && stats.blocks > 0 && (stats.soloBlocks ?? 0) > stats.blocks / 2) {
+            return { solo: true };
+        }
         if (stats) {
             const validTags = [...stats.tags.entries()]
                 .filter(([tag]) => (tagTotals.get(tag) ?? 0) >= MIN_TAG_BLOCKS)
@@ -219,27 +244,32 @@ function buildPoolEntries({ addrStats, tagTotals }) {
         }
     }
 
-    // name -> entry
+    // groupKey -> entry. Named pools merge their addresses under one entry;
+    // solo miners get one entry per address (they are different individuals).
     const pools = new Map();
     for (const [addr, stats] of addrStats) {
         const identity = resolve(addr, stats);
         if (!identity && stats.blocks < MIN_UNTAGGED) continue;
 
-        const name = identity?.name ?? `Unknown pool (${addr.slice(0, 10)}…)`;
-        if (!pools.has(name)) {
-            pools.set(name, {
+        const isSolo = identity?.solo === true;
+        const name = isSolo ? 'Solo miner' : (identity?.name ?? `Unknown pool (${addr.slice(0, 10)}…)`);
+        const groupKey = isSolo ? `solo:${addr}` : name;
+
+        if (!pools.has(groupKey)) {
+            pools.set(groupKey, {
                 name,
                 ...(identity?.link ? { link: identity.link } : {}),
-                confidence: identity?.confidence ?? 0.5,
+                ...(isSolo ? { solo: true } : {}),
+                confidence: identity?.confidence ?? (isSolo ? 0.9 : 0.5),
                 addresses: [],
                 blocks: 0,
                 firstSeen: Infinity,
                 lastSeen: 0,
-                source: identity ? 'coinbase-scan' : 'coinbase-scan-untagged',
+                source: isSolo ? 'coinbase-scan-solo' : (identity ? 'coinbase-scan' : 'coinbase-scan-untagged'),
                 _addrBlocks: new Map(),
             });
         }
-        const pool = pools.get(name);
+        const pool = pools.get(groupKey);
         pool.addresses.push(addr);
         pool._addrBlocks.set(addr, stats.blocks);
         pool.blocks += stats.blocks;
@@ -255,7 +285,9 @@ function buildPoolEntries({ addrStats, tagTotals }) {
         pool.addresses.sort((a, b) => (pool._addrBlocks.get(b) ?? 0) - (pool._addrBlocks.get(a) ?? 0));
         delete pool._addrBlocks;
         if (pool.firstSeen === Infinity) { pool.firstSeen = 0; pool.lastSeen = 0; }
-        const key = pool.name.startsWith('Unknown pool')
+        const key = pool.solo
+            ? `solo-${pool.addresses[0].slice(0, 10)}`
+            : pool.name.startsWith('Unknown pool')
             ? `unknown-${pool.addresses[0].slice(0, 10)}`
             : pool.name;
         result[key] = pool;

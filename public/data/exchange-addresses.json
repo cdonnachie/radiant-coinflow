@@ -1,6 +1,6 @@
 {
   "version": "1.0.0",
-  "lastUpdated": "2026-08-31T13:12:15.916Z",
+  "lastUpdated": "2026-08-31T13:35:51.970Z",
   "_comment": "Known Radiant (RXD) entity addresses. Populate with exchange deposit/hot wallets, mining pool payout addresses, and service addresses as they are identified.",
   "exchanges": {
     "CoinEx": {
@@ -5361,29 +5361,18 @@
       "lastSeen": 453972,
       "source": "Solo miner (open-source solo miner software; individual, not a pool)."
     },
-    "solo-1PJrWyj7RA": {
-      "name": "Solo miner",
-      "solo": true,
+    "MangledPool": {
+      "name": "MangledPool",
+      "link": "https://mangledpool.com/",
       "confidence": 0.9,
       "addresses": [
-        "1PJrWyj7RAvE1JLd6yYfQw3cDCSzasnbpH"
+        "1PJrWyj7RAvE1JLd6yYfQw3cDCSzasnbpH",
+        "19JdxT6qYyQ2u1CFVjiriVoHfa1xEWhvky"
       ],
       "blocks": 30,
       "firstSeen": 451684,
       "lastSeen": 459703,
-      "source": "Solo miner (open-source solo miner software; individual, not a pool)."
-    },
-    "solo-19JdxT6qYy": {
-      "name": "Solo miner",
-      "solo": true,
-      "confidence": 0.9,
-      "addresses": [
-        "19JdxT6qYyQ2u1CFVjiriVoHfa1xEWhvky"
-      ],
-      "blocks": 22,
-      "firstSeen": 449709,
-      "lastSeen": 459201,
-      "source": "Solo miner (open-source solo miner software; individual, not a pool)."
+      "source": "Identified by operator. Mining pool with two payout addresses (solo-mining service + pool mining)."
     }
   },
   "services": {}

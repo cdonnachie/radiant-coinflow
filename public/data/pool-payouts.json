@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-31T13:12:31.439Z",
+  "generatedAt": "2026-08-31T13:43:08.102Z",
   "windowMaxTxs": 1500,
   "pools": [
     {
@@ -244,12 +244,12 @@
       "name": "M2Pool",
       "link": "https://m2pool.com/",
       "addresses": 1,
-      "scanned": 1575,
-      "totalTx": 84943,
+      "scanned": 1581,
+      "totalTx": 84949,
       "windowStart": 1787389572,
-      "windowEnd": 1788180951,
-      "rewardBlocks": 1559,
-      "rewardRxd": 19488785.737353917,
+      "windowEnd": 1788181775,
+      "rewardBlocks": 1565,
+      "rewardRxd": 19563786.823483914,
       "payoutEvents": 16,
       "avgIntervalHours": 14.411648148148148,
       "medianRecipients": 2,
@@ -402,18 +402,24 @@
       "name": "K1Pool",
       "link": "https://k1pool.com/",
       "addresses": 1,
-      "scanned": 1500,
-      "totalTx": 44006,
+      "scanned": 1502,
+      "totalTx": 44008,
       "windowStart": 1786015896,
-      "windowEnd": 1788178380,
-      "rewardBlocks": 956,
-      "rewardRxd": 11951131.164051253,
-      "payoutEvents": 544,
-      "avgIntervalHours": 1.104795375485983,
+      "windowEnd": 1788182644,
+      "rewardBlocks": 957,
+      "rewardRxd": 11963631.801196253,
+      "payoutEvents": 545,
+      "avgIntervalHours": 1.1063868464052287,
       "medianRecipients": 5,
       "pattern": "consolidation",
       "patternText": "consolidation / pay-from-elsewhere (median 5 recipients)",
       "recent": [
+        {
+          "height": 460282,
+          "ts": 1788182644,
+          "recipients": 13,
+          "rxdOut": 37503.155184999996
+        },
         {
           "height": 460250,
           "ts": 1788175550,
@@ -467,12 +473,6 @@
           "ts": 1788150278,
           "recipients": 4,
           "rxdOut": 25001.797185000003
-        },
-        {
-          "height": 460140,
-          "ts": 1788144869,
-          "recipients": 5,
-          "rxdOut": 20029.535678610002
         }
       ]
     },
@@ -481,18 +481,24 @@
       "name": "Kryptex",
       "link": "https://pool.kryptex.com",
       "addresses": 1,
-      "scanned": 1501,
-      "totalTx": 8978,
-      "windowStart": 1780683937,
-      "windowEnd": 1788179545,
-      "rewardBlocks": 864,
-      "rewardRxd": 10804459.367300093,
+      "scanned": 1500,
+      "totalTx": 8980,
+      "windowStart": 1780690505,
+      "windowEnd": 1788181658,
+      "rewardBlocks": 863,
+      "rewardRxd": 10791958.30023009,
       "payoutEvents": 637,
-      "avgIntervalHours": 3.271652253668762,
+      "avgIntervalHours": 3.271817348008384,
       "medianRecipients": 16,
       "pattern": "consolidation",
       "patternText": "consolidation / pay-from-elsewhere (median 16 recipients)",
       "recent": [
+        {
+          "height": 460279,
+          "ts": 1788181658,
+          "recipients": 12,
+          "rxdOut": 12500.23801
+        },
         {
           "height": 460248,
           "ts": 1788174712,
@@ -546,12 +552,6 @@
           "ts": 1788077610,
           "recipients": 13,
           "rxdOut": 12500.122215
-        },
-        {
-          "height": 459902,
-          "ts": 1788070262,
-          "recipients": 14,
-          "rxdOut": 25000.543515
         }
       ]
     },
@@ -561,17 +561,29 @@
       "link": "https://vipor.net",
       "addresses": 1,
       "scanned": 1501,
-      "totalTx": 233815,
-      "windowStart": 1786745567,
-      "windowEnd": 1788180772,
-      "rewardBlocks": 852,
-      "rewardRxd": 10650891.367710268,
-      "payoutEvents": 649,
-      "avgIntervalHours": 0.6151037379972565,
+      "totalTx": 233818,
+      "windowStart": 1786751643,
+      "windowEnd": 1788181961,
+      "rewardBlocks": 851,
+      "rewardRxd": 10638386.023740267,
+      "payoutEvents": 650,
+      "avgIntervalHours": 0.6121888375278205,
       "medianRecipients": 42,
       "pattern": "direct",
       "patternText": "direct payout to miners (median 42 recipients)",
       "recent": [
+        {
+          "height": 460281,
+          "ts": 1788181961,
+          "recipients": 87,
+          "rxdOut": 38392.687995
+        },
+        {
+          "height": 460274,
+          "ts": 1788181226,
+          "recipients": 71,
+          "rxdOut": 12499.857199999999
+        },
         {
           "height": 460267,
           "ts": 1788180481,
@@ -619,18 +631,6 @@
           "ts": 1788154820,
           "recipients": 48,
           "rxdOut": 25002.070265000002
-        },
-        {
-          "height": 460171,
-          "ts": 1788152419,
-          "recipients": 46,
-          "rxdOut": 25002.285514999996
-        },
-        {
-          "height": 460161,
-          "ts": 1788150594,
-          "recipients": 48,
-          "rxdOut": 37504.328575
         }
       ]
     },
@@ -639,12 +639,12 @@
       "name": "WhalePool",
       "link": "https://whalepool.com/",
       "addresses": 1,
-      "scanned": 1504,
-      "totalTx": 13390,
+      "scanned": 1505,
+      "totalTx": 13391,
       "windowStart": 1784542140,
-      "windowEnd": 1788179727,
-      "rewardBlocks": 771,
-      "rewardRxd": 9638417.900843238,
+      "windowEnd": 1788181281,
+      "rewardBlocks": 772,
+      "rewardRxd": 9650917.970143238,
       "payoutEvents": 733,
       "avgIntervalHours": 1.3770495598057073,
       "medianRecipients": 2,
@@ -789,6 +789,85 @@
           "ts": 1784843803,
           "recipients": 2,
           "rxdOut": 12561.20466556
+        }
+      ]
+    },
+    {
+      "key": "MangledPool",
+      "name": "MangledPool",
+      "link": "https://mangledpool.com/",
+      "addresses": 2,
+      "scanned": 102,
+      "totalTx": 102,
+      "windowStart": 1785002208,
+      "windowEnd": 1788167593,
+      "rewardBlocks": 53,
+      "rewardRxd": 662577.25642008,
+      "payoutEvents": 49,
+      "avgIntervalHours": 18.150590277777777,
+      "medianRecipients": 2,
+      "pattern": "consolidation",
+      "patternText": "consolidation / pay-from-elsewhere (median 2 recipients)",
+      "recent": [
+        {
+          "height": 460227,
+          "ts": 1788167593,
+          "recipients": 2,
+          "rxdOut": 12500.431420030001
+        },
+        {
+          "height": 459810,
+          "ts": 1788042697,
+          "recipients": 2,
+          "rxdOut": 12500.45832503
+        },
+        {
+          "height": 459750,
+          "ts": 1788023289,
+          "recipients": 2,
+          "rxdOut": 12503.35636003
+        },
+        {
+          "height": 459528,
+          "ts": 1787956222,
+          "recipients": 2,
+          "rxdOut": 12500.541100030001
+        },
+        {
+          "height": 459501,
+          "ts": 1787950107,
+          "recipients": 2,
+          "rxdOut": 12500.271545029998
+        },
+        {
+          "height": 459303,
+          "ts": 1787895338,
+          "recipients": 1,
+          "rxdOut": 12500.4007
+        },
+        {
+          "height": 459150,
+          "ts": 1787843953,
+          "recipients": 2,
+          "rxdOut": 12500.32786503
+        },
+        {
+          "height": 459009,
+          "ts": 1787802592,
+          "recipients": 1,
+          "rxdOut": 12500.0484
+        },
+        {
+          "height": 458965,
+          "ts": 1787789628,
+          "recipients": 2,
+          "rxdOut": 12500.63339003
+        },
+        {
+          "height": 458712,
+          "ts": 1787709683,
+          "recipients": 2,
+          "rxdOut": 12505.44076503
         }
       ]
     }
