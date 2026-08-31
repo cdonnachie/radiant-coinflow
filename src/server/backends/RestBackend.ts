@@ -25,7 +25,14 @@ import { BackendRpcError, ChainBackend } from './ChainBackend';
 const HISTORY_PAGE = 200; // API maximum
 // Bound per-request work on pathological histories (env-overridable).
 const MAX_SPEND_SCAN = Number(process.env.RADIANT_SPEND_SCAN_LIMIT ?? 2500);
-const MAX_UTXO_SCAN = Number(process.env.RADIANT_REST_UTXO_SCAN ?? 5000);
+// UTXO reconstruction fetches one transaction per history entry, so this is the
+// expensive cap that protects an address lookup on a very active address from
+// stalling or OOMing the server. On busy addresses the newest N txs are used
+// (recent UTXOs); addresses with fewer txs are reconstructed in full.
+const MAX_ADDR_UTXO_SCAN = Number(process.env.RADIANT_ADDR_UTXO_SCAN ?? 600);
+// getaddresstxids only pages history metadata (no per-tx fetch), so it can scan
+// more cheaply.
+const MAX_ADDR_TXID_SCAN = Number(process.env.RADIANT_ADDR_TXID_SCAN ?? 3000);
 const TX_CACHE_MAX = 8000;
 const SPENT_CACHE_MAX = 20000;
 
@@ -193,7 +200,7 @@ export class RestBackend implements ChainBackend {
     private async getAddressTxids(addresses: string[]): Promise<string[]> {
         const entries: Array<{ txid: string; height: number }> = [];
         for (const address of addresses) {
-            await this.forEachHistory(address, MAX_UTXO_SCAN, (e) => {
+            await this.forEachHistory(address, MAX_ADDR_TXID_SCAN, (e) => {
                 entries.push({ txid: e.txid, height: e.height });
             });
         }
@@ -294,9 +301,15 @@ export class RestBackend implements ChainBackend {
         const created = new Map<string, { txid: string; outputIndex: number; satoshis: bigint; height: number }>();
         const spent = new Set<string>();
 
-        // Collect the history txids (bounded), then fetch each once.
+        // Collect the history txids (bounded), then fetch each once. On a very
+        // active address only the newest MAX_ADDR_UTXO_SCAN are scanned, so the
+        // lookup returns recent UTXOs quickly instead of grinding through tens
+        // of thousands of transactions.
         const txids: string[] = [];
-        await this.forEachHistory(address, MAX_UTXO_SCAN, (e) => { txids.push(e.txid); });
+        const { truncated } = await this.forEachHistory(address, MAX_ADDR_UTXO_SCAN, (e) => { txids.push(e.txid); });
+        if (truncated) {
+            console.warn(`[rest-backend] address ${address} exceeds ${MAX_ADDR_UTXO_SCAN} txs; UTXO listing limited to the most recent (partial).`);
+        }
 
         for (let i = 0; i < txids.length; i += 10) {
             const batch = txids.slice(i, i + 10);
