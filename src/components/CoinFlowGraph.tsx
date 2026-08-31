@@ -30,7 +30,6 @@ import ReactFlow, {
     type NodeTypes,
     type NodeProps,
     getNodesBounds,
-    getViewportForBounds,
 } from 'reactflow';
 import { Activity, Download, Map, Maximize2, Minimize2, X, Copy, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
@@ -522,17 +521,19 @@ export const CoinFlowGraphVisualization: React.FC<CoinFlowGraphVisualizationProp
         const viewportEl = document.querySelector('.react-flow__viewport') as HTMLElement;
         if (!viewportEl) return;
 
-        const imageWidth = 2000;
-        const imageHeight = 1500;
+        // Size the export canvas to the full graph bounds so nothing is clipped.
+        // Render at a legible zoom, scaled down only if a dimension would exceed
+        // the browser's canvas limits.
+        const PADDING = 80; // px in graph space, around the content
+        const MAX_DIM = 10000; // safe per-side canvas cap across browsers
         const nodesBounds = getNodesBounds(nodes);
-        const { x, y, zoom } = getViewportForBounds(
-            nodesBounds,
-            imageWidth,
-            imageHeight,
-            0.5,
-            2,
-            0.1,
-        );
+        const contentWidth = nodesBounds.width + PADDING * 2;
+        const contentHeight = nodesBounds.height + PADDING * 2;
+        const zoom = Math.min(2, MAX_DIM / contentWidth, MAX_DIM / contentHeight);
+        const imageWidth = Math.round(contentWidth * zoom);
+        const imageHeight = Math.round(contentHeight * zoom);
+        const x = (-nodesBounds.x + PADDING) * zoom;
+        const y = (-nodesBounds.y + PADDING) * zoom;
 
         const txShort = graph.startingUtxo.txid.slice(0, 8);
         const addrShort = graph.startingUtxo.address.slice(0, 10);
