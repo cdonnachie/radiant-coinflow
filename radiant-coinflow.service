@@ -27,7 +27,9 @@ Environment=RADIANT_ELECTRUM_TLS=false
 # Environment=RADIANT_RPC_USER=rpcuser
 # Environment=RADIANT_RPC_PASS=rpcpassword
 
-ExecStart=/usr/bin/node node_modules/.bin/next start --port 3000
+# Point at Next's real JS entry — node_modules/.bin/next is a pnpm shell shim,
+# not JavaScript, so `node .bin/next` fails with a SyntaxError.
+ExecStart=/usr/bin/node node_modules/next/dist/bin/next start --port 3000
 Restart=on-failure
 RestartSec=5
 
