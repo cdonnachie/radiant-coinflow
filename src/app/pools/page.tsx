@@ -28,7 +28,7 @@ interface PoolSummary {
     medianRecipients: number;
     pattern: 'direct' | 'consolidation' | 'none';
     patternText: string;
-    consolidatesTo?: Array<{ address: string; txCount: number; rxd: number }>;
+    consolidatesTo?: Array<{ address: string; txCount: number; rxd: number; entity?: string; entityType?: string }>;
     recent: PayoutEvent[];
 }
 
@@ -136,7 +136,7 @@ export default function PoolsPage() {
                                 {p.consolidatesTo && p.consolidatesTo.length > 0 && (
                                     <div>
                                         <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
-                                            Consolidates to
+                                            Sends funds to
                                         </div>
                                         <div className="space-y-1">
                                             {p.consolidatesTo.map((c) => (
@@ -144,7 +144,17 @@ export default function PoolsPage() {
                                                    href={`https://radiantexplorer.com/address/${c.address}`}
                                                    target="_blank" rel="noopener noreferrer"
                                                    className="flex items-center justify-between text-xs gap-2 hover:text-primary">
-                                                    <code className="font-mono truncate">{c.address}</code>
+                                                    <span className="flex items-center gap-1.5 min-w-0">
+                                                        {c.entity && (
+                                                            <Badge
+                                                                variant={c.entityType === 'exchange' ? 'default' : 'secondary'}
+                                                                className="shrink-0 text-[10px] px-1.5 py-0"
+                                                            >
+                                                                {c.entity}
+                                                            </Badge>
+                                                        )}
+                                                        <code className="font-mono truncate">{c.address}</code>
+                                                    </span>
                                                     <span className="text-muted-foreground shrink-0">{c.txCount}×</span>
                                                 </a>
                                             ))}
