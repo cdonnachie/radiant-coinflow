@@ -1,0 +1,22 @@
+[Unit]
+Description=Regenerate Radiant CoinFlow mining-pool payout data
+Documentation=https://github.com/cdonnachie/radiant-coinflow
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=coinflow
+Group=coinflow
+WorkingDirectory=/opt/radiant-coinflow
+# Reads RADIANT_REST_URL etc. (optional — the script also reads .env.local itself)
+EnvironmentFile=-/opt/radiant-coinflow/.env.local
+# Writes public/data/pool-payouts.json, which /api/pools serves on the next
+# request — no app restart needed.
+ExecStart=/usr/bin/node scripts/pool-payouts.mjs
+# Bound runtime so a stuck scan can't pile up.
+TimeoutStartSec=1800
+Nice=10
+
+[Install]
+WantedBy=multi-user.target

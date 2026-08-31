@@ -1,0 +1,15 @@
+[Unit]
+Description=Refresh Radiant CoinFlow mining-pool payout data periodically
+Documentation=https://github.com/cdonnachie/radiant-coinflow
+
+[Timer]
+# Every 6 hours (pools pay out roughly hourly, but a 6h-fresh dashboard is
+# plenty and keeps REST load light). Adjust OnCalendar to taste.
+OnCalendar=*-*-* 00/6:15:00
+# Run once shortly after boot if a scheduled run was missed while powered off.
+Persistent=true
+# Small random delay so it doesn't hammer the indexer at an exact tick.
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target
