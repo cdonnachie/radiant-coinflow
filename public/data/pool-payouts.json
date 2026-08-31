@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-31T13:58:56.800Z",
+  "generatedAt": "2026-08-31T15:02:03.589Z",
   "windowMaxTxs": 1500,
   "pools": [
     {
@@ -22,7 +22,122 @@
         {
           "address": "19KERKV7Rj1ADygQyvx6BdjH2ycCZTf5Yg",
           "txCount": 182,
-          "rxd": 23445944.82999999
+          "rxd": 23445944.82999999,
+          "lastTs": 1713325566
+        },
+        {
+          "address": "122PFv4PeNE2Cgm4KgbG5ud5Q3p2j3wdFM",
+          "txCount": 97,
+          "rxd": 8734677.090000002,
+          "lastTs": 1714864860
+        },
+        {
+          "address": "1KjLrn481ctNGAwmAMnmsurfvX5vYvDCaG",
+          "txCount": 54,
+          "rxd": 867324.93247791,
+          "lastTs": 1681158751
+        },
+        {
+          "address": "16MZvfS1PotkNHHcgr6pYDirwDE57bs1ba",
+          "txCount": 34,
+          "rxd": 4596687.63,
+          "lastTs": 1675151970
+        },
+        {
+          "address": "13Q9vUarMrgaghnC5TCNjvzxVCEAe3Depd",
+          "txCount": 28,
+          "rxd": 2991789.01,
+          "lastTs": 1694241773
+        },
+        {
+          "address": "1DRvncZ5YeQYrN4WVyE4zG2zMmrqMShWA2",
+          "txCount": 10,
+          "rxd": 617805.3500000001,
+          "lastTs": 1758563026
+        },
+        {
+          "address": "13tCfYLAsediz1XrHGLSdEZDPEGn1fhngi",
+          "txCount": 8,
+          "rxd": 301215.53359191,
+          "lastTs": 1678494358
+        },
+        {
+          "address": "1G8ML29G2J5GBjFgvMcDKFHozb1WKMVPJo",
+          "txCount": 7,
+          "rxd": 6363.215923840001,
+          "lastTs": 1686435960
+        },
+        {
+          "address": "1FbbJDqeAf7YzpQBLHDyzWNUuKkgNRgchb",
+          "txCount": 6,
+          "rxd": 1011.89121138,
+          "lastTs": 1695592165
+        },
+        {
+          "address": "1NVT8gDtrymVMGhK7DeYkRsm3VisyPbZXM",
+          "txCount": 6,
+          "rxd": 22060.02884132,
+          "lastTs": 1680836225
+        },
+        {
+          "address": "16wzxbbiwKm9Ssaic7tZ9kV1f7EzkfRzUW",
+          "txCount": 5,
+          "rxd": 5198.80847838,
+          "lastTs": 1686202411
+        },
+        {
+          "address": "13yJVBJzfro43AoJseJuD2DzBoEbwa6Qzb",
+          "txCount": 5,
+          "rxd": 36506.77162132,
+          "lastTs": 1678656623
+        },
+        {
+          "address": "1BEjPycRKJZrbAfBeBsyD4V1Fa1MogK8Uc",
+          "txCount": 4,
+          "rxd": 881.54056462,
+          "lastTs": 1714330839
+        },
+        {
+          "address": "1P4oMSZ7d4UasRpZWah7bSsweK7Heysg1E",
+          "txCount": 4,
+          "rxd": 2962.9063301900005,
+          "lastTs": 1708443516
+        },
+        {
+          "address": "1E11F49gtV86eK9PtngjJNoWXYxzqq2FSr",
+          "txCount": 3,
+          "rxd": 1676.3339322299998,
+          "lastTs": 1718080742
+        },
+        {
+          "address": "122GjjcgZo7spDtJEFufwuupSyBEEVthA9",
+          "txCount": 3,
+          "rxd": 579.46244115,
+          "lastTs": 1705874605
+        },
+        {
+          "address": "1KefBew8FxVriST4Wao72YtXEe4k6MwFvM",
+          "txCount": 3,
+          "rxd": 894.85355324,
+          "lastTs": 1704876015
+        },
+        {
+          "address": "14nZQsWxJwnMcf8LXRMH4zWKxFa1hfnQtZ",
+          "txCount": 3,
+          "rxd": 6158.85019445,
+          "lastTs": 1682346364
+        },
+        {
+          "address": "1SGYhoZrQ6meFnTegXZZqg5EMTue69C7C",
+          "txCount": 3,
+          "rxd": 15518.6227295,
+          "lastTs": 1680836225
+        },
+        {
+          "address": "17g47YqGyiWgcqPTA51RHw8vGcbaFCz96Z",
+          "txCount": 3,
+          "rxd": 5183.03609364,
+          "lastTs": 1680821198
         }
       ],
       "recent": [
@@ -184,7 +299,128 @@
       "medianRecipients": 2,
       "pattern": "consolidation",
       "patternText": "consolidation / pay-from-elsewhere (median 2 recipients)",
-      "consolidatesTo": [],
+      "consolidatesTo": [
+        {
+          "address": "1KQhe1Eir31jPAR62Kvkh3J4GFKAcPxWan",
+          "txCount": 47,
+          "rxd": 23621.295082540004,
+          "lastTs": 1760091055
+        },
+        {
+          "address": "18MEQ9PAdiwzQCVpLQWxdeMbp3ZAFqVoDs",
+          "txCount": 31,
+          "rxd": 1047539.1950006802,
+          "lastTs": 1759313125
+        },
+        {
+          "address": "1GT2t5U4DrXst3QNWVapkS6jsJ8ZCZkwik",
+          "txCount": 27,
+          "rxd": 13143.59353346,
+          "lastTs": 1760004669
+        },
+        {
+          "address": "157gdtFDv3UdqpEFnZwqGAGKNQTNVYmHYP",
+          "txCount": 26,
+          "rxd": 14930.739421520002,
+          "lastTs": 1760091055
+        },
+        {
+          "address": "1HDdvjW4ubfFP8Xu6DkeUFE6Z6zb9MSedv",
+          "txCount": 26,
+          "rxd": 17931.93547379,
+          "lastTs": 1759874835
+        },
+        {
+          "address": "1fsvBK8oXST2Wg5Cm5utJpMTCoMaxF2Tb",
+          "txCount": 24,
+          "rxd": 14319.74363465,
+          "lastTs": 1760091055
+        },
+        {
+          "address": "1PzPKcyregjmWB6a4kkr3HNSjP9KhyxZSw",
+          "txCount": 24,
+          "rxd": 14953.647339120002,
+          "lastTs": 1760091055
+        },
+        {
+          "address": "1MXoxD1N6t6PznDCeYfzNjT1xveEoVMU1r",
+          "txCount": 24,
+          "rxd": 10016.85136729,
+          "lastTs": 1760004669
+        },
+        {
+          "address": "1QHcvq31nTpjAsuiDDMg8WF5ECjy24qgTr",
+          "txCount": 23,
+          "rxd": 15319.17978923,
+          "lastTs": 1759788448
+        },
+        {
+          "address": "1BPXbknFpu3j6PRq7K3Ey2koie3L5KPiB8",
+          "txCount": 20,
+          "rxd": 14067.542292979999,
+          "lastTs": 1759874835
+        },
+        {
+          "address": "1NU8nZ3cU67ByK5z2vEfd95TPXVbNAqPDd",
+          "txCount": 19,
+          "rxd": 10760.065860179999,
+          "lastTs": 1759874835
+        },
+        {
+          "address": "1AFF1JgEvCUTrXgf5JxVhGRixAAPbXF2c4",
+          "txCount": 19,
+          "rxd": 12835.04863893,
+          "lastTs": 1759874835
+        },
+        {
+          "address": "1KP4bQEtG777rRpkKeJ1ckB4mZpt2ZxxCe",
+          "txCount": 19,
+          "rxd": 13210.304211420002,
+          "lastTs": 1759615631
+        },
+        {
+          "address": "1NXEXC2GyduqeEuqV2JRNDUdDSrQ3C9vhG",
+          "txCount": 19,
+          "rxd": 12395.88473691,
+          "lastTs": 1759615631
+        },
+        {
+          "address": "1FJDeP8mnAqQyWbpcWBkgHpdnhF1euj6Ar",
+          "txCount": 18,
+          "rxd": 7642.85560628,
+          "lastTs": 1760004669
+        },
+        {
+          "address": "1RgZy7jGktqTfxgLrDuNg2M8iixwFx1PE",
+          "txCount": 18,
+          "rxd": 12378.57139804,
+          "lastTs": 1760004669
+        },
+        {
+          "address": "1G2zNt6AxEJ2iLzCWXpvCthphqKaLbRBSU",
+          "txCount": 18,
+          "rxd": 12617.145136829997,
+          "lastTs": 1759874835
+        },
+        {
+          "address": "13CM3RMuuph2xKUUZkaSmCg6PruJ2ge4d6",
+          "txCount": 18,
+          "rxd": 10267.502704290002,
+          "lastTs": 1759874835
+        },
+        {
+          "address": "12rJnupWuw6YdWDBwkewEgQ5kif54wXb78",
+          "txCount": 17,
+          "rxd": 11409.426096199999,
+          "lastTs": 1759874835
+        },
+        {
+          "address": "175FF6rNfK7x1ugQcSMrZD8X1ULrZYEpiE",
+          "txCount": 17,
+          "rxd": 8659.9703109,
+          "lastTs": 1759874835
+        }
+      ],
       "recent": [
         {
           "height": 375746,
@@ -253,12 +489,12 @@
       "name": "M2Pool",
       "link": "https://m2pool.com/",
       "addresses": 1,
-      "scanned": 1582,
-      "totalTx": 84950,
+      "scanned": 1594,
+      "totalTx": 84961,
       "windowStart": 1787389572,
-      "windowEnd": 1788183620,
-      "rewardBlocks": 1566,
-      "rewardRxd": 19576286.983323913,
+      "windowEnd": 1788187669,
+      "rewardBlocks": 1578,
+      "rewardRxd": 19726291.419123918,
       "payoutEvents": 16,
       "avgIntervalHours": 14.411648148148148,
       "medianRecipients": 2,
@@ -268,17 +504,32 @@
         {
           "address": "15Y6NgvPEXB3dqBgpzP9SuhKT4bWB1uKJi",
           "txCount": 8,
-          "rxd": 519070.51587411
+          "rxd": 519070.51587411,
+          "lastTs": 1788167801
         },
         {
           "address": "1KzCCkK6k3v8jN2pRSnBeV8FErae83G7FE",
           "txCount": 7,
-          "rxd": 81901.48
+          "rxd": 81901.48,
+          "lastTs": 1788167593
         },
         {
           "address": "1HqWbU8tDjyYUWFncgYhtpApAmXRrSEHDg",
           "txCount": 7,
-          "rxd": 97886.42000000001
+          "rxd": 97886.42000000001,
+          "lastTs": 1788167593
+        },
+        {
+          "address": "1712zxiK6Sjx8hzcPJ1yjaLzfvpyvnhF42",
+          "txCount": 7,
+          "rxd": 18230779.03,
+          "lastTs": 1788167593
+        },
+        {
+          "address": "1M2QHJxUbErHBMKQdejbLhcFDTq1YiN8Gu",
+          "txCount": 3,
+          "rxd": 5784.23,
+          "lastTs": 1787650665
         }
       ],
       "recent": [
@@ -364,7 +615,122 @@
         {
           "address": "1EVHgj9wpoQdz9MBL8TBV3pHFcR2yiXZLS",
           "txCount": 180,
-          "rxd": 9138872.104801998
+          "rxd": 9138872.104801998,
+          "lastTs": 1785754629
+        },
+        {
+          "address": "143aLDjNaiptdnAh1YWVx7VpYD38MRNC3p",
+          "txCount": 57,
+          "rxd": 106093.15298438999,
+          "lastTs": 1779784274
+        },
+        {
+          "address": "1FnystM5d6p8eXYiUFdnYN8mwLuVtHeh4R",
+          "txCount": 51,
+          "rxd": 36033.50354584,
+          "lastTs": 1787585289
+        },
+        {
+          "address": "1BsQ8KiVVVh6FHW7yxmZD3nLixajzg2ZgF",
+          "txCount": 33,
+          "rxd": 78465.5677883,
+          "lastTs": 1787585289
+        },
+        {
+          "address": "1DHe7WXzRJy7xLy9GZrZnCQcuoZZT4mkq2",
+          "txCount": 26,
+          "rxd": 347.99783219000005,
+          "lastTs": 1779103411
+        },
+        {
+          "address": "17yjQaDwS6NWsNKN7QjkGxNjS7UR8NUacd",
+          "txCount": 21,
+          "rxd": 2095.5818789,
+          "lastTs": 1772220076
+        },
+        {
+          "address": "1L9QpcM2UwAh9wKn8a6o8su5yeYw2bLhDp",
+          "txCount": 20,
+          "rxd": 292.13636641000005,
+          "lastTs": 1787396589
+        },
+        {
+          "address": "1KzCCkK6k3v8jN2pRSnBeV8FErae83G7FE",
+          "txCount": 19,
+          "rxd": 129112.59817017,
+          "lastTs": 1779769501
+        },
+        {
+          "address": "1LT5YbHwdwC43s5FfMfiRGyG4dMXzmYuYZ",
+          "txCount": 14,
+          "rxd": 7196.712601819999,
+          "lastTs": 1787889693
+        },
+        {
+          "address": "1it8yESDNyYNF91WL1wxAAXpbwKDfKwE3",
+          "txCount": 12,
+          "rxd": 109927.17264975999,
+          "lastTs": 1680377466
+        },
+        {
+          "address": "1FUMybWU21AXtCGf7wSaQipGBMaYc8vPv4",
+          "txCount": 11,
+          "rxd": 3087.1418720999995,
+          "lastTs": 1773527549
+        },
+        {
+          "address": "1Dp6FZj2BUuyN3sUtQ9PJiwVHSWMyddrGr",
+          "txCount": 10,
+          "rxd": 106336.85814204,
+          "lastTs": 1672298637
+        },
+        {
+          "address": "1PjbGkkMZUBhs2T4cLPu5zYBX9rohbHuc8",
+          "txCount": 9,
+          "rxd": 43851.180998589996,
+          "lastTs": 1779103411
+        },
+        {
+          "address": "1P45dnVWfetScnwTVt9QhRwCMGe2YrruUW",
+          "txCount": 9,
+          "rxd": 162654.82006994,
+          "lastTs": 1670410462
+        },
+        {
+          "address": "112tSrRpMS8jNgmtaQncRTABVtmQuYiz6x",
+          "txCount": 7,
+          "rxd": 340514.236535,
+          "lastTs": 1773934088
+        },
+        {
+          "address": "1PGUryFiWkUjePQ2u5i1btGdtwxNuiPzS9",
+          "txCount": 6,
+          "rxd": 10658.00439811,
+          "lastTs": 1780075610
+        },
+        {
+          "address": "155rCrL5ruBBG54aJYukmNE3Yn4TycE2E3",
+          "txCount": 5,
+          "rxd": 71.63742576,
+          "lastTs": 1785456333
+        },
+        {
+          "address": "1DV9mDHEpRxyNNy7XZZqAfTvuj6KzToPxw",
+          "txCount": 5,
+          "rxd": 406.15733916000005,
+          "lastTs": 1773527549
+        },
+        {
+          "address": "1AYvCsXQQnXPitGDVkXsw88pFRMuWKYzfa",
+          "txCount": 5,
+          "rxd": 62.41508071999999,
+          "lastTs": 1768433950
+        },
+        {
+          "address": "1FBh5NjJ6eSMduoGfzzx7pP2o7CE9VR1oT",
+          "txCount": 5,
+          "rxd": 2038.83664857,
+          "lastTs": 1765979190
         }
       ],
       "recent": [
@@ -435,35 +801,152 @@
       "name": "K1Pool",
       "link": "https://k1pool.com/",
       "addresses": 1,
-      "scanned": 1502,
-      "totalTx": 44012,
-      "windowStart": 1786022737,
-      "windowEnd": 1788184277,
-      "rewardBlocks": 958,
-      "rewardRxd": 11976130.644026255,
-      "payoutEvents": 544,
-      "avgIntervalHours": 1.1049248004910988,
+      "scanned": 1501,
+      "totalTx": 44016,
+      "windowStart": 1786029815,
+      "windowEnd": 1788188090,
+      "rewardBlocks": 956,
+      "rewardRxd": 11951136.304521117,
+      "payoutEvents": 545,
+      "avgIntervalHours": 1.1020603553921566,
       "medianRecipients": 5,
       "pattern": "consolidation",
       "patternText": "consolidation / pay-from-elsewhere (median 5 recipients)",
       "consolidatesTo": [
         {
           "address": "1TdNAih1S72LeWM7bvkdcQ3uFoAxPH9zE",
-          "txCount": 243,
-          "rxd": 1681034.6999596385
+          "txCount": 244,
+          "rxd": 1686624.4667001986,
+          "lastTs": 1788186384
         },
         {
           "address": "16mrCej8Rk3AdFCgizCa8z4U6dKYdV8ria",
-          "txCount": 230,
-          "rxd": 305846.1393269101
+          "txCount": 231,
+          "rxd": 307055.7600263501,
+          "lastTs": 1788186384
         },
         {
           "address": "1Jjmd2kR6HTMu2gCGfAyn8s9bVojYJL91C",
-          "txCount": 186,
-          "rxd": 380503.01548828
+          "txCount": 185,
+          "rxd": 378826.01690849,
+          "lastTs": 1787373008
+        },
+        {
+          "address": "18A1KBsqjt516QLaHwGYbW1ZQVMHEdgey4",
+          "txCount": 115,
+          "rxd": 136580.25693636,
+          "lastTs": 1788186384
+        },
+        {
+          "address": "13BuWK6pskGdCAbD2xT2arLRabnWUMnGwn",
+          "txCount": 106,
+          "rxd": 616011.5505486302,
+          "lastTs": 1788186384
+        },
+        {
+          "address": "15xtg7pagzQS6AEHMYVMYNgi3JY668os1z",
+          "txCount": 96,
+          "rxd": 113679.52251572997,
+          "lastTs": 1787707386
+        },
+        {
+          "address": "17PJpVU5BL55ZjZU8aRY1joCsHjxBNejfN",
+          "txCount": 80,
+          "rxd": 88846.96026222002,
+          "lastTs": 1788182644
+        },
+        {
+          "address": "14jWiKFNfMG9VUAWzMPuxKRcxj41p6QtXq",
+          "txCount": 80,
+          "rxd": 89034.57517504,
+          "lastTs": 1788182644
+        },
+        {
+          "address": "15pUrQeUpxWaBCThHXjtMYgXE1rA9xooXj",
+          "txCount": 78,
+          "rxd": 87306.08169138999,
+          "lastTs": 1788182644
+        },
+        {
+          "address": "1Dtyi3JV3n7tU4kB2wKd48pjYSSjG6A6b",
+          "txCount": 74,
+          "rxd": 83635.84854016,
+          "lastTs": 1788188090
+        },
+        {
+          "address": "1JcjrYxVp1SPfrrdavFyndyAKcR52Ww1EG",
+          "txCount": 69,
+          "rxd": 157489.59117762998,
+          "lastTs": 1787508269
+        },
+        {
+          "address": "197ky9jzWP6QgGNx46Yd4JwaCwy8ZFKePJ",
+          "txCount": 59,
+          "rxd": 632032.3611658901,
+          "lastTs": 1788182644
+        },
+        {
+          "address": "16uhZGKgfxri63pcuNRP9cLhuUGe9UM1tr",
+          "txCount": 51,
+          "rxd": 55248.86734097002,
+          "lastTs": 1788182644
+        },
+        {
+          "address": "13kh79bm5GSwoHCP9N7zrjja6uqZny5Y44",
+          "txCount": 48,
+          "rxd": 50761.80285689,
+          "lastTs": 1788186384
+        },
+        {
+          "address": "1LPLgTEtj1qyJaSGjyehDTNKKe9Ekjk2jm",
+          "txCount": 47,
+          "rxd": 50429.98259937,
+          "lastTs": 1788174043
+        },
+        {
+          "address": "1EaGvcSrMZSz3QYtMVV1KfXcEC8s8yZjXZ",
+          "txCount": 47,
+          "rxd": 99105.50595471002,
+          "lastTs": 1788170233
+        },
+        {
+          "address": "14yzuFpCUJCSV6r1EHGvrn8LLyif5qKMKo",
+          "txCount": 46,
+          "rxd": 49078.93623564999,
+          "lastTs": 1788182644
+        },
+        {
+          "address": "1C3qNvcharjvWG4115irzFS5A6wrpeCqZr",
+          "txCount": 45,
+          "rxd": 47675.38208834001,
+          "lastTs": 1788182644
+        },
+        {
+          "address": "15kyp2SYEZUDEsBsGqvM5dEmgs5tuk3kiz",
+          "txCount": 45,
+          "rxd": 47544.79867048999,
+          "lastTs": 1788182644
+        },
+        {
+          "address": "13XrZeqd83MD1gdwmjZ29ud4CQxKCXi98t",
+          "txCount": 43,
+          "rxd": 545698.5715609699,
+          "lastTs": 1788172963
         }
       ],
       "recent": [
+        {
+          "height": 460302,
+          "ts": 1788188090,
+          "recipients": 3,
+          "rxdOut": 12499.996599999999
+        },
+        {
+          "height": 460297,
+          "ts": 1788186384,
+          "recipients": 7,
+          "rxdOut": 18075.93771869
+        },
         {
           "height": 460282,
           "ts": 1788182644,
@@ -511,18 +994,6 @@
           "ts": 1788154041,
           "recipients": 4,
           "rxdOut": 12500.1957
-        },
-        {
-          "height": 460167,
-          "ts": 1788152059,
-          "recipients": 8,
-          "rxdOut": 31528.569248120002
-        },
-        {
-          "height": 460157,
-          "ts": 1788150278,
-          "recipients": 4,
-          "rxdOut": 25001.797185000003
         }
       ]
     },
@@ -531,12 +1002,12 @@
       "name": "Kryptex",
       "link": "https://pool.kryptex.com",
       "addresses": 1,
-      "scanned": 1500,
-      "totalTx": 8980,
+      "scanned": 1501,
+      "totalTx": 8981,
       "windowStart": 1780690505,
-      "windowEnd": 1788181658,
-      "rewardBlocks": 863,
-      "rewardRxd": 10791958.30023009,
+      "windowEnd": 1788187079,
+      "rewardBlocks": 864,
+      "rewardRxd": 10804458.95461009,
       "payoutEvents": 637,
       "avgIntervalHours": 3.271817348008384,
       "medianRecipients": 16,
@@ -546,17 +1017,122 @@
         {
           "address": "1DhCcHzGXCmfvHXeEEL3fhQH5UgvLYL3d5",
           "txCount": 614,
-          "rxd": 4261116.951826718
+          "rxd": 4261116.951826718,
+          "lastTs": 1788181658
         },
         {
           "address": "1J9zg9YgRe2hRNckAJ5P4GP8B5apjuRjyL",
           "txCount": 589,
-          "rxd": 177739.53922924993
+          "rxd": 177739.53922924993,
+          "lastTs": 1788181658
         },
         {
           "address": "1zaQ2RqzzrEPQx5ozTNxcBMYfyRm5TRRH",
           "txCount": 589,
-          "rxd": 350474.1106942197
+          "rxd": 350474.1106942197,
+          "lastTs": 1788181658
+        },
+        {
+          "address": "1C9tyti98MSoA7SxQrm7HvRoenCaW4YUQe",
+          "txCount": 589,
+          "rxd": 355313.6362965602,
+          "lastTs": 1788181658
+        },
+        {
+          "address": "1Gagbo69yHhbBE6wS7i6aLYH2hBZgCprJh",
+          "txCount": 588,
+          "rxd": 353304.3220124099,
+          "lastTs": 1788181658
+        },
+        {
+          "address": "17vBabyHqN9gU3XmWBijQX6Gp8ApPjehfC",
+          "txCount": 567,
+          "rxd": 168317.60095753008,
+          "lastTs": 1788181658
+        },
+        {
+          "address": "1GiJuavytH3hMcdQTEbR6wQSy2ZGtsoUJy",
+          "txCount": 564,
+          "rxd": 168551.80787885003,
+          "lastTs": 1788181658
+        },
+        {
+          "address": "1EWfBcvAz7ydZL1rv9Bo7itCVgUn2LB5kf",
+          "txCount": 545,
+          "rxd": 162816.25027249,
+          "lastTs": 1788181658
+        },
+        {
+          "address": "153mH8EDWzaPGddNRHWNRUy2xVbC5bfhKX",
+          "txCount": 504,
+          "rxd": 149180.92220415975,
+          "lastTs": 1788181658
+        },
+        {
+          "address": "18tiGthegeqCtYkarjw2fxJGocfjmaJLCf",
+          "txCount": 478,
+          "rxd": 127431.39551894001,
+          "lastTs": 1788181658
+        },
+        {
+          "address": "12GCMJ9AtkpcgoPqCmZhDYMkJeEkYsoLQw",
+          "txCount": 455,
+          "rxd": 1461833.4952292603,
+          "lastTs": 1788181658
+        },
+        {
+          "address": "1BahFvDoan9ammevcsccjP2QQb1X1B7XbN",
+          "txCount": 409,
+          "rxd": 121097.44705552007,
+          "lastTs": 1785906578
+        },
+        {
+          "address": "17YHP9Xyaqfq4TPYaKrJPnwyPYM6beZ6fu",
+          "txCount": 370,
+          "rxd": 106054.33753028997,
+          "lastTs": 1785856157
+        },
+        {
+          "address": "13jmBJCug85FnKcrCo1iw7NYvVLYS2hCaW",
+          "txCount": 367,
+          "rxd": 110442.61381069996,
+          "lastTs": 1785312631
+        },
+        {
+          "address": "1BRZh3P4psDgYYdPh6W4gJPAT1Ey1xVyBb",
+          "txCount": 346,
+          "rxd": 102820.98906485998,
+          "lastTs": 1785121789
+        },
+        {
+          "address": "1NXEXC2GyduqeEuqV2JRNDUdDSrQ3C9vhG",
+          "txCount": 297,
+          "rxd": 90049.80791496999,
+          "lastTs": 1784571974
+        },
+        {
+          "address": "18VE4bKqVe64UzRooPpZme4NSo6CYxxJj2",
+          "txCount": 252,
+          "rxd": 77476.36473789002,
+          "lastTs": 1785744566
+        },
+        {
+          "address": "1NANmoW1k6CgpbRSxcQBrTrPtVzSQv5YHv",
+          "txCount": 244,
+          "rxd": 128311.60487167999,
+          "lastTs": 1788131315
+        },
+        {
+          "address": "1PWW4nCfPtUZc1eHDopvgw5dNtrbERNRyg",
+          "txCount": 191,
+          "rxd": 59188.8916462,
+          "lastTs": 1788131315
+        },
+        {
+          "address": "1Lxz2wshfKDSGMJe6WHNTSuZAn1PEqBzYQ",
+          "txCount": 126,
+          "rxd": 253125.68645248993,
+          "lastTs": 1788124110
         }
       ],
       "recent": [
@@ -718,7 +1294,128 @@
       "medianRecipients": 2,
       "pattern": "consolidation",
       "patternText": "consolidation / pay-from-elsewhere (median 2 recipients)",
-      "consolidatesTo": [],
+      "consolidatesTo": [
+        {
+          "address": "1Ctsuc9LtjZTWzmEeCygZ81s26ebsQ1atx",
+          "txCount": 53,
+          "rxd": 884612.5274511002,
+          "lastTs": 1788170941
+        },
+        {
+          "address": "1BHzziPFr4mNdwNteqWGeWFvjUdGGv8pKp",
+          "txCount": 53,
+          "rxd": 914866.83679413,
+          "lastTs": 1788170941
+        },
+        {
+          "address": "142n7a18TGTfzJAHWQE3K5RWU9TbQDrXM6",
+          "txCount": 43,
+          "rxd": 45517.25293972001,
+          "lastTs": 1788041539
+        },
+        {
+          "address": "1B2chSY4Qu5FHQJF2AtMQaY4k88TtMpbeD",
+          "txCount": 41,
+          "rxd": 635333.91514628,
+          "lastTs": 1788170941
+        },
+        {
+          "address": "1FJDeP8mnAqQyWbpcWBkgHpdnhF1euj6Ar",
+          "txCount": 41,
+          "rxd": 25734.794387200003,
+          "lastTs": 1788127849
+        },
+        {
+          "address": "1734oXak6ZFpMJ57mTpgVLDnGQ1Puiydvp",
+          "txCount": 37,
+          "rxd": 36399.32009253,
+          "lastTs": 1787954832
+        },
+        {
+          "address": "1K8ksjnUEhgpNuiDbwdvEnX5eB4bJzucBN",
+          "txCount": 33,
+          "rxd": 38535.092784600005,
+          "lastTs": 1788127849
+        },
+        {
+          "address": "1AkeUXmeZyPoFissQFu5QgDLmqwuX1VxBV",
+          "txCount": 32,
+          "rxd": 36423.08014638,
+          "lastTs": 1787998213
+        },
+        {
+          "address": "14oaVGhYzhvHQyr8niZP3TiMJwQXjmoooE",
+          "txCount": 31,
+          "rxd": 39831.07467587,
+          "lastTs": 1788170941
+        },
+        {
+          "address": "19nJDgkkg6it37fqq4Ya2zgFairQHCgTi",
+          "txCount": 31,
+          "rxd": 506197.48583047994,
+          "lastTs": 1787306798
+        },
+        {
+          "address": "12Jejard5njTEoMa4WBWRBaD12jnQrPzPT",
+          "txCount": 29,
+          "rxd": 30727.01887847,
+          "lastTs": 1788170941
+        },
+        {
+          "address": "13a45HUNfTTzqnnVHyRhgmWqtCtD5xKC2q",
+          "txCount": 28,
+          "rxd": 36215.405909149995,
+          "lastTs": 1788170941
+        },
+        {
+          "address": "1AboEzoR2fiR2SXkgauqE7W8LaSfvDNuBd",
+          "txCount": 27,
+          "rxd": 33744.68182741,
+          "lastTs": 1788170941
+        },
+        {
+          "address": "1JBv8PwJVu36Kib1Q2Ad6eaCBCbWzzWs8E",
+          "txCount": 24,
+          "rxd": 22669.124270290005,
+          "lastTs": 1788041539
+        },
+        {
+          "address": "1M1n5TiEVdYBTk4wBG5LqX76M5qZh9Mf88",
+          "txCount": 23,
+          "rxd": 27134.788021420005,
+          "lastTs": 1788170941
+        },
+        {
+          "address": "1P3dbijEzzSoHt89mMoJqPuK3udPSV6G6N",
+          "txCount": 21,
+          "rxd": 332374.31842006,
+          "lastTs": 1785838034
+        },
+        {
+          "address": "1JLWYiUJ7DMQfJTnoVvVN1dBYVpBs2FDo1",
+          "txCount": 18,
+          "rxd": 23615.99632125,
+          "lastTs": 1788170941
+        },
+        {
+          "address": "1FY4zY9jH7EUjhv8oTDiqSVXdv1yEfeoDN",
+          "txCount": 18,
+          "rxd": 241486.12982811,
+          "lastTs": 1788041539
+        },
+        {
+          "address": "127GpvpxnC7BKuDJ1s22d9Di8bMjMwfYQA",
+          "txCount": 18,
+          "rxd": 26536.52907984,
+          "lastTs": 1787825234
+        },
+        {
+          "address": "13EZB3WuGT4T3Sc3uG8sk8xTzdoGa6NGtD",
+          "txCount": 18,
+          "rxd": 9928.696367980003,
+          "lastTs": 1786485977
+        }
+      ],
       "recent": [
         {
           "height": 460235,
@@ -802,17 +1499,74 @@
         {
           "address": "1FTYNR213wX7X94qJeFXqirBkFgQrzMX8H",
           "txCount": 184,
-          "rxd": 1965547.1382003098
+          "rxd": 1965547.1382003098,
+          "lastTs": 1784900124
         },
         {
           "address": "1M5vUJ4WptpqF8hWX8akTgFi3Sn7snukY1",
           "txCount": 178,
-          "rxd": 8964.9486
+          "rxd": 8964.9486,
+          "lastTs": 1784900124
         },
         {
           "address": "142swP9vpvoGXkZWkdPjwyyvEzMNnqNvi4",
           "txCount": 124,
-          "rxd": 2006808.8319999997
+          "rxd": 2006808.8319999997,
+          "lastTs": 1774139216
+        },
+        {
+          "address": "1FRvK28wCkyWUWuvkpkUmSAgvxCpL99udx",
+          "txCount": 109,
+          "rxd": 249830.77609999996,
+          "lastTs": 1772668522
+        },
+        {
+          "address": "14zXpBBgnUDn3MePEoRLnw9jnbFSRoKuQ3",
+          "txCount": 96,
+          "rxd": 347713.19349999994,
+          "lastTs": 1777439061
+        },
+        {
+          "address": "1MJsgNtKQcBH1SrCzww5MUXU3VmHXqvAub",
+          "txCount": 63,
+          "rxd": 1206310.4243404798,
+          "lastTs": 1785391697
+        },
+        {
+          "address": "114jppPPPgci49NFR5mTqLJYtFcaxKxHsF",
+          "txCount": 57,
+          "rxd": 859511.15684512,
+          "lastTs": 1784900124
+        },
+        {
+          "address": "18PnMkK7zBAmUKTa4V3Bani9j4DrLPiiaZ",
+          "txCount": 42,
+          "rxd": 770779.4508,
+          "lastTs": 1785305933
+        },
+        {
+          "address": "16nnsDGt9Zfxv4bJ9tjyi5HQurbK9Lfz8b",
+          "txCount": 35,
+          "rxd": 597494.8265,
+          "lastTs": 1785153291
+        },
+        {
+          "address": "14kEgJKNwRVwjvzP5633DVeTJf8TrK1G9J",
+          "txCount": 13,
+          "rxd": 63503.148100000006,
+          "lastTs": 1770780014
+        },
+        {
+          "address": "1EW8ucYsWbc3QZYUzTctrtmvoZMkUUc6vh",
+          "txCount": 13,
+          "rxd": 13571.176199999998,
+          "lastTs": 1770780014
+        },
+        {
+          "address": "19xXTzm2FheSz8mvWp9f22ZoG2tfX5pRuB",
+          "txCount": 8,
+          "rxd": 18857.3329,
+          "lastTs": 1781990376
         }
       ],
       "recent": [
@@ -898,17 +1652,26 @@
         {
           "address": "1FTYNR213wX7X94qJeFXqirBkFgQrzMX8H",
           "txCount": 18,
-          "rxd": 205413.49825000006
+          "rxd": 205413.49825000006,
+          "lastTs": 1787895338
         },
         {
           "address": "114jppPPPgci49NFR5mTqLJYtFcaxKxHsF",
           "txCount": 16,
-          "rxd": 168392.28635
+          "rxd": 168392.28635,
+          "lastTs": 1787950107
         },
         {
           "address": "1MJsgNtKQcBH1SrCzww5MUXU3VmHXqvAub",
           "txCount": 11,
-          "rxd": 137514.74860000002
+          "rxd": 137514.74860000002,
+          "lastTs": 1788167593
+        },
+        {
+          "address": "16nnsDGt9Zfxv4bJ9tjyi5HQurbK9Lfz8b",
+          "txCount": 7,
+          "rxd": 87515.9786,
+          "lastTs": 1788042697
         }
       ],
       "recent": [

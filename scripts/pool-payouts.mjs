@@ -99,8 +99,9 @@ async function analyzePool(name, entry) {
                     if (a && !poolSet.has(a)) {
                         recipients.add(a);
                         rxdOut += o.value || 0;
-                        const d = destCounts.get(a) ?? { count: 0, rxd: 0 };
+                        const d = destCounts.get(a) ?? { count: 0, rxd: 0, lastTs: 0 };
                         d.count++; d.rxd += o.value || 0;
+                        d.lastTs = Math.max(d.lastTs, h.timestamp || 0);
                         destCounts.set(a, d);
                     }
                 });
@@ -123,16 +124,18 @@ async function analyzePool(name, entry) {
         : patternKind === 'direct' ? `direct payout to miners (median ${medianRecip} recipients)`
         : `consolidation / pay-from-elsewhere (median ${medianRecip} recipients)`;
 
-    // For consolidating pools, the recurring outbound destination(s) are the
-    // consolidation wallet the pool sweeps into before paying miners. Keep the
-    // ones that receive from a meaningful share of outbound txs (drops one-off
-    // exchange sends); direct-payout pools have no single such destination.
+    // For consolidating pools, the recurring outbound destinations are where
+    // the pool routes rewards (its own consolidation wallets, and exchange
+    // deposit addresses). Keep every destination it sends to repeatedly — the
+    // /api/pools route aggregates these by exchange, so a pool's total flow to
+    // e.g. MEXC (split across many deposit addresses) is summed rather than
+    // lost under one high-count wallet. Direct-payout pools have none.
     const consolidatesTo = patternKind === 'consolidation'
         ? [...destCounts.entries()]
-            .filter(([, d]) => d.count >= Math.max(3, payouts.length * 0.2))
+            .filter(([, d]) => d.count >= 3)
             .sort((a, b) => b[1].count - a[1].count)
-            .slice(0, 3)
-            .map(([address, d]) => ({ address, txCount: d.count, rxd: d.rxd }))
+            .slice(0, 20)
+            .map(([address, d]) => ({ address, txCount: d.count, rxd: d.rxd, lastTs: d.lastTs }))
         : [];
 
     console.log(`\n=== ${name}${entry.link ? '  ' + entry.link : ''} ===`);

@@ -34,11 +34,33 @@ export async function GET() {
             // entities file missing — serve pool data without entity labels
         }
 
+        // Build a per-pool "sendsTo" list: destinations that belong to a known
+        // exchange are aggregated under that exchange (summing tx counts across
+        // its deposit addresses), so a pool's true flow to e.g. MEXC — spread
+        // over many low-count deposit addresses — is visible rather than hidden
+        // behind one high-count consolidation wallet. Unlabeled destinations
+        // stay as individual addresses.
+        type Row = {
+            kind: 'entity' | 'address';
+            entity?: string; entityType?: string; address?: string;
+            txCount: number; addresses: number; lastTs: number;
+        };
         for (const p of pools.pools || []) {
-            for (const c of p.consolidatesTo || []) {
+            const byEntity = new Map<string, Row>();
+            const addrs: Row[] = [];
+            for (const c of (p.consolidatesTo || []) as Array<{ address: string; txCount: number; lastTs?: number }>) {
                 const o = owner.get(c.address);
-                if (o) { c.entity = o.name; c.entityType = o.type; }
+                if (o) {
+                    const g = byEntity.get(o.name) ?? { kind: 'entity', entity: o.name, entityType: o.type, txCount: 0, addresses: 0, lastTs: 0 };
+                    g.txCount += c.txCount; g.addresses += 1; g.lastTs = Math.max(g.lastTs, c.lastTs || 0);
+                    byEntity.set(o.name, g);
+                } else {
+                    addrs.push({ kind: 'address', address: c.address, txCount: c.txCount, addresses: 1, lastTs: c.lastTs || 0 });
+                }
             }
+            p.sendsTo = [...byEntity.values(), ...addrs]
+                .sort((a, b) => b.txCount - a.txCount)
+                .slice(0, 6);
         }
 
         return NextResponse.json(pools);

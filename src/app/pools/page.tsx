@@ -28,7 +28,12 @@ interface PoolSummary {
     medianRecipients: number;
     pattern: 'direct' | 'consolidation' | 'none';
     patternText: string;
-    consolidatesTo?: Array<{ address: string; txCount: number; rxd: number; entity?: string; entityType?: string }>;
+    consolidatesTo?: Array<{ address: string; txCount: number; rxd: number }>;
+    sendsTo?: Array<{
+        kind: 'entity' | 'address';
+        entity?: string; entityType?: string; address?: string;
+        txCount: number; addresses: number; lastTs: number;
+    }>;
     recent: PayoutEvent[];
 }
 
@@ -160,31 +165,43 @@ export default function PoolsPage() {
                                     </div>
                                 </div>
 
-                                {p.consolidatesTo && p.consolidatesTo.length > 0 && (
+                                {p.sendsTo && p.sendsTo.length > 0 && (
                                     <div>
                                         <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
                                             Sends funds to
                                         </div>
                                         <div className="space-y-1">
-                                            {p.consolidatesTo.map((c) => (
-                                                <a key={c.address}
-                                                   href={`https://radiantexplorer.com/address/${c.address}`}
-                                                   target="_blank" rel="noopener noreferrer"
-                                                   className="flex items-center justify-between text-xs gap-2 hover:text-primary">
-                                                    <span className="flex items-center gap-1.5 min-w-0">
-                                                        {c.entity && (
+                                            {p.sendsTo.map((s, i) => {
+                                                const ago = activity(s.lastTs);
+                                                return s.kind === 'entity' ? (
+                                                    <div key={'e' + i} className="flex items-center justify-between text-xs gap-2">
+                                                        <span className="flex items-center gap-1.5 min-w-0">
                                                             <Badge
-                                                                variant={c.entityType === 'exchange' ? 'default' : 'secondary'}
+                                                                variant={s.entityType === 'exchange' ? 'default' : 'secondary'}
                                                                 className="shrink-0 text-[10px] px-1.5 py-0"
                                                             >
-                                                                {c.entity}
+                                                                {s.entity}
                                                             </Badge>
-                                                        )}
-                                                        <code className="font-mono truncate">{c.address}</code>
-                                                    </span>
-                                                    <span className="text-muted-foreground shrink-0">{c.txCount}×</span>
-                                                </a>
-                                            ))}
+                                                            <span className="text-muted-foreground truncate">
+                                                                {s.addresses} address{s.addresses > 1 ? 'es' : ''}
+                                                            </span>
+                                                        </span>
+                                                        <span className="shrink-0 text-muted-foreground">
+                                                            {s.txCount}× · {ago.label}
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <a key={'a' + i}
+                                                       href={`https://radiantexplorer.com/address/${s.address}`}
+                                                       target="_blank" rel="noopener noreferrer"
+                                                       className="flex items-center justify-between text-xs gap-2 hover:text-primary">
+                                                        <code className="font-mono truncate">{s.address}</code>
+                                                        <span className="shrink-0 text-muted-foreground">
+                                                            {s.txCount}× · {ago.label}
+                                                        </span>
+                                                    </a>
+                                                );
+                                            })}
                                         </div>
                                     </div>
                                 )}
