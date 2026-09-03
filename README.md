@@ -31,6 +31,12 @@ pnpm install
 
 Create `.env.local` in the project root (see `.env.local.example`).
 
+For correct Open Graph / social share URLs in production, set the public site URL:
+
+```env
+NEXT_PUBLIC_SITE_URL=https://your-domain.example
+```
+
 For the RXinDexer REST backend:
 
 ```env
