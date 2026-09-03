@@ -166,22 +166,37 @@ async function main() {
     const pools = Object.entries(data.mining_pools || {});
     console.log(`Pool payout analysis via ${BASE} (${pools.length} pools, up to ${MAX_HISTORY} txs each)`);
     const results = [];
+    let writeError = null;
     const write = () => {
         if (!OUT) return;
         const sorted = [...results].sort((a, b) => b.rewardRxd - a.rewardRxd);
-        writeFileSync(OUT, JSON.stringify({
-            generatedAt: new Date().toISOString(),
-            windowMaxTxs: MAX_HISTORY,
-            pools: sorted,
-        }, null, 2) + '\n');
+        try {
+            writeFileSync(OUT, JSON.stringify({
+                generatedAt: new Date().toISOString(),
+                windowMaxTxs: MAX_HISTORY,
+                pools: sorted,
+            }, null, 2) + '\n');
+            writeError = null;
+        } catch (e) {
+            writeError = e;
+            console.error(`  write failed: ${e.message}`);
+        }
     };
     for (const [key, entry] of pools) {
         if (entry.solo) continue; // solo miners aren't pools — skip the payout page
         if (only && !`${key} ${entry.name}`.toLowerCase().includes(only.toLowerCase())) continue;
         if (!entry.addresses?.length) continue;
-        try { const summary = await analyzePool(entry.name || key, entry); results.push({ key, ...summary }); write(); }
-        catch (e) { console.log(`\n=== ${entry.name || key} ===\n  error: ${e.message}`); }
+        try { const summary = await analyzePool(entry.name || key, entry); results.push({ key, ...summary }); }
+        catch (e) { console.log(`\n=== ${entry.name || key} ===\n  error: ${e.message}`); continue; }
+        write();
     }
-    if (OUT) console.log(`\nWrote ${results.length} pool summaries to ${OUT}`);
+    if (OUT) {
+        if (writeError) {
+            console.error(`\nFailed to write ${OUT}: ${writeError.message}`);
+            process.exitCode = 1;
+        } else {
+            console.log(`\nWrote ${results.length} pool summaries to ${OUT}`);
+        }
+    }
 }
-main().then(() => process.exit(0)).catch((e) => { console.error('failed:', e); process.exit(1); });
+main().then(() => process.exit(process.exitCode ?? 0)).catch((e) => { console.error('failed:', e); process.exit(1); });

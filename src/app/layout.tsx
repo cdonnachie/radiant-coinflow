@@ -8,7 +8,7 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000'),
+    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://coinflow.rxd.zone'),
     title: 'CoinFlow Explorer — Radiant Blockchain',
     description:
         'Trace and visualize coin flow on the Radiant (RXD) blockchain. Analyze transaction outputs, track fund movements, and explore wallet clusters.',
