@@ -105,6 +105,16 @@ export function analyzeScript(scriptHex: string): ScriptMetadata {
         // all other opcodes carry no immediate
     }
 
+    // NFT-pattern fallback: the singleton form puts the ref FIRST
+    // (d8<ref> 75 76a914<h160>88ac), so the P2PKH lock is not at the script
+    // head. Any embedded P2PKH byte pattern in a ref-carrying script is the
+    // holder lock — without this, NFT outputs have no owner and address-keyed
+    // spent lookups (REST backend) cannot follow them.
+    if (!ownerAddress && refs.length > 0) {
+        const m = /76a914([0-9a-f]{40})88ac/.exec(buf.toString('hex'));
+        if (m) ownerAddress = base58CheckEncode(P2PKH_VERSION, Buffer.from(m[1], 'hex'));
+    }
+
     return { ownerAddress, refs, hasRefs: refs.length > 0 };
 }
 

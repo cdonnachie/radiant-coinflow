@@ -19,6 +19,21 @@ import type {
     AddressLabel,
 } from '@/types/coinFlow';
 import { ClusteringMethod } from '@/types/coinFlow';
+import { Ref } from '@/lib/glyph/ref';
+
+/** Script-form 72-hex refs → canonical display form; malformed entries dropped. */
+function refsToDisplay(refs?: string[]): string[] | undefined {
+    if (!refs?.length) return undefined;
+    const out: string[] = [];
+    for (const r of refs) {
+        try {
+            out.push(Ref.fromScriptHex(r).toDisplayHex());
+        } catch {
+            // malformed ref payload — skip
+        }
+    }
+    return out.length > 0 ? out : undefined;
+}
 
 export class OptimizedCoinFlowService {
     private apiService: ChainDataService;
@@ -110,6 +125,7 @@ export class OptimizedCoinFlowService {
             depth: 0,
             isStarting: true,
             hasRefs: startingIdentity.hasRefs || undefined,
+            refs: startingIdentity.refs,
             isContract: startingIdentity.isContract || undefined,
         };
 
@@ -217,6 +233,7 @@ export class OptimizedCoinFlowService {
                     isUnspent,
                     depth: currentDepth + 1,
                     hasRefs: identity.hasRefs || undefined,
+                    refs: identity.refs,
                     isContract: identity.isContract || undefined,
                 };
 
@@ -322,6 +339,7 @@ export class OptimizedCoinFlowService {
             depth: 0,
             isStarting: true,
             hasRefs: startingIdentity.hasRefs || undefined,
+            refs: startingIdentity.refs,
             isContract: startingIdentity.isContract || undefined,
         };
 
@@ -397,6 +415,7 @@ export class OptimizedCoinFlowService {
                 sourceOutput: any;
                 sourceAddress: string;
                 hasRefs: boolean;
+                refs?: string[];
                 isContract: boolean;
             }
 
@@ -415,6 +434,7 @@ export class OptimizedCoinFlowService {
                     vin, sourceTx, sourceOutput,
                     sourceAddress: identity.address,
                     hasRefs: identity.hasRefs,
+                    refs: identity.refs,
                     isContract: identity.isContract,
                 });
             }
@@ -461,6 +481,11 @@ export class OptimizedCoinFlowService {
                         depth: currentDepth + 1,
                         inputCount: infos.length,
                         hasRefs: infos.some((i) => i.hasRefs) || undefined,
+                        // Union of source refs, capped — an aggregate node can mix tokens
+                        refs: (() => {
+                            const u = [...new Set(infos.flatMap((i) => i.refs ?? []))].slice(0, 4);
+                            return u.length > 0 ? u : undefined;
+                        })(),
                         isContract: infos.some((i) => i.isContract) || undefined,
                     };
                     graph.nodes.push(sourceNode);
@@ -605,19 +630,21 @@ export class OptimizedCoinFlowService {
             type?: string;
             ownerAddress?: string;
             hasRefs?: boolean;
+            refs?: string[];
             scripthash?: string;
         };
-    }): { address: string; isContract: boolean; hasRefs: boolean } | null {
+    }): { address: string; isContract: boolean; hasRefs: boolean; refs?: string[] } | null {
         const spk = output.scriptPubKey;
         if (!spk) return null;
         const hasRefs = spk.hasRefs === true;
+        const refs = refsToDisplay(spk.refs);
 
         const addr = (spk.addresses && spk.addresses[0]) || spk.address;
-        if (addr) return { address: addr, isContract: false, hasRefs };
-        if (spk.ownerAddress) return { address: spk.ownerAddress, isContract: false, hasRefs };
+        if (addr) return { address: addr, isContract: false, hasRefs, refs };
+        if (spk.ownerAddress) return { address: spk.ownerAddress, isContract: false, hasRefs, refs };
         if (spk.type === 'nulldata') return null;
         if (spk.scripthash) {
-            return { address: `contract:${spk.scripthash.slice(0, 16)}`, isContract: true, hasRefs };
+            return { address: `contract:${spk.scripthash.slice(0, 16)}`, isContract: true, hasRefs, refs };
         }
         return null;
     }

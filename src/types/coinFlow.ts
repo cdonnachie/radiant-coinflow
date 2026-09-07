@@ -32,6 +32,8 @@ export interface CoinFlowNode {
     inputCount?: number;
     /** Output carries Radiant refs (token/induction contract) */
     hasRefs?: boolean;
+    /** Refs carried by this output, in 72-hex display form (Glyphs token ids) */
+    refs?: string[];
     /** Pure contract output with no owner address (identified by scripthash) */
     isContract?: boolean;
     /** Aggregate node collapsing N small sibling outputs/sources (not traced further) */

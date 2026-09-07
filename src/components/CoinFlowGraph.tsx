@@ -34,6 +34,7 @@ import ReactFlow, {
 import { Activity, Download, Map, Maximize2, Minimize2, X, Copy, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import type { CoinFlowGraph, CoinFlowNode } from '@/types/coinFlow';
+import type { GlyphMetadata } from '@/types/glyph';
 import { ClusteringMethod } from '@/types/coinFlow';
 import { graphlib, layout } from '@dagrejs/dagre';
 import { toPng } from 'html-to-image';
@@ -44,12 +45,56 @@ interface CoinFlowGraphVisualizationProps {
     selectedNode?: string;
     onNodeSelect: (nodeId: string) => void;
     height?: string;
+    /** Glyph metadata keyed by 72-hex display ref (from GlyphMetadataService). */
+    glyphMeta?: Record<string, GlyphMetadata>;
 }
+
+/** First resolved glyph among a node's refs (aggregate nodes can mix tokens). */
+const findNodeGlyph = (
+    node: CoinFlowNode,
+    glyphMeta?: Record<string, GlyphMetadata>,
+): GlyphMetadata | undefined =>
+    node.refs?.map((r) => glyphMeta?.[r]).find((m) => m?.found);
+
+/** Node/details token badge: decoded glyph info when known, generic otherwise. */
+const GlyphBadge: React.FC<{ node: CoinFlowNode; glyph?: GlyphMetadata }> = ({ node, glyph }) => {
+    if (glyph) {
+        return (
+            <a
+                href={`/token/${glyph.refDisplay}`}
+                onClick={(e) => e.stopPropagation()}
+                className="flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-100 text-cyan-800 hover:bg-cyan-200"
+                title={`${glyph.name ?? 'Glyph token'} — view token journey`}
+            >
+                {glyph.hasIcon && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                        src={`/api/glyph/${glyph.refDisplay}/icon`}
+                        alt=""
+                        className="w-4 h-4 rounded-sm object-cover"
+                        onError={(e) => {
+                            (e.target as HTMLImageElement).hidden = true;
+                        }}
+                    />
+                )}
+                <span className="truncate max-w-[120px]">
+                    {glyph.ticker || glyph.name || 'TOKEN'} · {glyph.typeLabel}
+                </span>
+            </a>
+        );
+    }
+    if (!node.hasRefs && !node.isContract) return null;
+    return (
+        <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-100 text-cyan-800">
+            {node.isContract ? 'CONTRACT' : 'TOKEN'}
+        </span>
+    );
+};
 
 const CoinFlowNodeComponent = ({
     data,
     selected,
-}: NodeProps<{ nodeData: CoinFlowNode; onSelect: () => void }>) => {
+}: NodeProps<{ nodeData: CoinFlowNode; onSelect: () => void; glyph?: GlyphMetadata }>) => {
     const getNodeColor = (node: CoinFlowNode): string => {
         if (node.isAggregate) return '#94a3b8';
         if (node.isStarting) return '#3b82f6';
@@ -122,11 +167,7 @@ const CoinFlowNodeComponent = ({
                         !nodeData.wallet?.serviceName &&
                         (nodeData.inputCount && nodeData.inputCount > 1 ? 'Source' : 'Address')}
                 </div>
-                {(nodeData.hasRefs || nodeData.isContract) && (
-                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-cyan-100 text-cyan-800">
-                        {nodeData.isContract ? 'CONTRACT' : 'TOKEN'}
-                    </span>
-                )}
+                <GlyphBadge node={nodeData} glyph={data.glyph} />
             </div>
 
             <div className="text-sm font-semibold text-gray-900 mb-1">
@@ -250,8 +291,9 @@ const ReactFlowVisualization: React.FC<{
 );
 
 // Node Details Card used in fullscreen dialog
-const NodeDetailsCard: React.FC<{ node: CoinFlowNode; onClose?: () => void }> = ({
+const NodeDetailsCard: React.FC<{ node: CoinFlowNode; glyph?: GlyphMetadata; onClose?: () => void }> = ({
     node,
+    glyph,
     onClose,
 }) => {
     const formatAmount = (amount: bigint) => formatRxd(amount) + ' RXD';
@@ -334,6 +376,53 @@ const NodeDetailsCard: React.FC<{ node: CoinFlowNode; onClose?: () => void }> = 
                         </div>
                     )}
                 </div>
+                {glyph && (
+                    <>
+                        <Separator />
+                        <div>
+                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                                Glyph Token
+                            </label>
+                            <div className="flex items-center gap-3 mt-2">
+                                {glyph.hasIcon && (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img
+                                        src={`/api/glyph/${glyph.refDisplay}/icon`}
+                                        alt=""
+                                        className="w-10 h-10 rounded object-cover"
+                                        onError={(e) => {
+                                            (e.target as HTMLImageElement).hidden = true;
+                                        }}
+                                    />
+                                )}
+                                <div className="min-w-0">
+                                    <div className="text-sm font-medium break-words">
+                                        {glyph.name || glyph.ticker || 'Unnamed token'}
+                                        {glyph.ticker && glyph.name && (
+                                            <span className="ml-1 text-muted-foreground">({glyph.ticker})</span>
+                                        )}
+                                    </div>
+                                    <div className="text-xs text-muted-foreground">{glyph.typeLabel}</div>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-2 mt-2">
+                                <code className="text-xs bg-muted px-2 py-1 rounded font-mono break-all flex-1">
+                                    {glyph.refShort}
+                                </code>
+                                <Button variant="ghost" size="sm" onClick={() => copyToClipboard(glyph.refDisplay)}>
+                                    <Copy className="h-3 w-3" />
+                                </Button>
+                            </div>
+                            <a
+                                href={`/token/${glyph.refDisplay}`}
+                                className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline mt-2"
+                            >
+                                <ExternalLink className="h-3 w-3" />
+                                View token journey
+                            </a>
+                        </div>
+                    </>
+                )}
                 <Separator />
                 <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -389,6 +478,7 @@ export const CoinFlowGraphVisualization: React.FC<CoinFlowGraphVisualizationProp
     selectedNode,
     onNodeSelect,
     height = '600px',
+    glyphMeta,
 }) => {
     const [showMiniMap, setShowMiniMap] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -408,7 +498,11 @@ export const CoinFlowGraphVisualization: React.FC<CoinFlowGraphVisualizationProp
                 id: node.id,
                 type: 'coinFlowNode',
                 position: { x: 0, y: 0 },
-                data: { nodeData: node, onSelect: () => onNodeSelect(node.id) },
+                data: {
+                    nodeData: node,
+                    onSelect: () => onNodeSelect(node.id),
+                    glyph: findNodeGlyph(node, glyphMeta),
+                },
                 selected: selectedNode === node.id,
                 sourcePosition: Position.Bottom,
                 targetPosition: Position.Top,
@@ -477,7 +571,7 @@ export const CoinFlowGraphVisualization: React.FC<CoinFlowGraphVisualizationProp
         });
 
         return getLayoutedElements(nodes, edges, 'TB');
-    }, [graph, selectedNode, onNodeSelect]);
+    }, [graph, selectedNode, onNodeSelect, glyphMeta]);
 
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -485,7 +579,7 @@ export const CoinFlowGraphVisualization: React.FC<CoinFlowGraphVisualizationProp
     useEffect(() => {
         setNodes(flowNodes);
         setEdges(flowEdges);
-    }, [graph, selectedNode, setNodes, setEdges]);
+    }, [graph, selectedNode, glyphMeta, setNodes, setEdges]);
 
     useEffect(() => {
         if (selectedNode && graph) {
@@ -724,6 +818,7 @@ export const CoinFlowGraphVisualization: React.FC<CoinFlowGraphVisualizationProp
                                         {selectedNodeDetails && (
                                             <NodeDetailsCard
                                                 node={selectedNodeDetails}
+                                                glyph={findNodeGlyph(selectedNodeDetails, glyphMeta)}
                                                 onClose={() => setShowNodeDetails(false)}
                                             />
                                         )}

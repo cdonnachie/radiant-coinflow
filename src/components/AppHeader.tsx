@@ -30,6 +30,9 @@ export function AppHeader() {
                         <Link href="/pools">Pools</Link>
                     </Button>
                     <Button variant="ghost" size="sm" asChild>
+                        <Link href="/token">Tokens</Link>
+                    </Button>
+                    <Button variant="ghost" size="sm" asChild>
                         <a
                             href="https://radiantblockchain.org"
                             target="_blank"

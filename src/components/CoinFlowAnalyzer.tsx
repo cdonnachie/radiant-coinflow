@@ -31,6 +31,8 @@ import { RadiantChainService } from '@/services/RadiantChainService';
 import type { AddressUtxo } from '@/services/ChainDataService';
 import { formatRxd } from '@/lib/amounts';
 import { CoinFlowGraphVisualization } from '@/components/CoinFlowGraph';
+import { getGlyphMetadataMany } from '@/services/GlyphMetadataService';
+import type { GlyphMetadata } from '@/types/glyph';
 import type {
     CoinFlowAnalysisResult,
     CoinFlowNode,
@@ -58,6 +60,7 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
     const [selectedNode, setSelectedNode] = useState<string>('');
     const [selectedNodeDetails, setSelectedNodeDetails] = useState<CoinFlowNode | null>(null);
     const [showSettings, setShowSettings] = useState(false);
+    const [glyphMeta, setGlyphMeta] = useState<Record<string, GlyphMetadata>>({});
 
     const [inputMode, setInputMode] = useState<'txid' | 'address'>('txid');
     const [addressInput, setAddressInput] = useState('');
@@ -94,6 +97,21 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
             setSelectedNodeDetails(null);
         }
     }, [selectedNode, result]);
+
+    // Resolve glyph metadata for every ref the trace surfaced (async, best-effort).
+    useEffect(() => {
+        setGlyphMeta({});
+        if (!result) return;
+        const refs = [...new Set(result.graph.nodes.flatMap((n) => n.refs ?? []))];
+        if (refs.length === 0) return;
+        let cancelled = false;
+        getGlyphMetadataMany(refs).then((meta) => {
+            if (!cancelled && Object.keys(meta).length > 0) setGlyphMeta(meta);
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [result]);
 
     const handleAnalyze = useCallback(async (overrideTxid?: string, overrideVout?: number) => {
         const effectiveTxid = (overrideTxid ?? txid).trim();
@@ -536,6 +554,7 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
                                     selectedNode={selectedNode}
                                     onNodeSelect={setSelectedNode}
                                     height="600px"
+                                    glyphMeta={glyphMeta}
                                 />
                             </div>
 
@@ -580,6 +599,61 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
                                                 </Badge>
                                             )}
                                         </div>
+                                        {(() => {
+                                            const glyph = selectedNodeDetails.refs
+                                                ?.map((r) => glyphMeta[r])
+                                                .find((m) => m?.found);
+                                            if (!glyph) return null;
+                                            return (
+                                                <div>
+                                                    <Label className="text-xs text-muted-foreground">Glyph Token</Label>
+                                                    <div className="flex items-center gap-3 mt-1">
+                                                        {glyph.hasIcon && (
+                                                            // eslint-disable-next-line @next/next/no-img-element
+                                                            <img
+                                                                src={`/api/glyph/${glyph.refDisplay}/icon`}
+                                                                alt=""
+                                                                className="w-10 h-10 rounded object-cover"
+                                                                onError={(e) => {
+                                                                    (e.target as HTMLImageElement).hidden = true;
+                                                                }}
+                                                            />
+                                                        )}
+                                                        <div className="min-w-0">
+                                                            <div className="text-sm font-medium break-words">
+                                                                {glyph.name || glyph.ticker || 'Unnamed token'}
+                                                                {glyph.ticker && glyph.name && (
+                                                                    <span className="ml-1 text-muted-foreground">
+                                                                        ({glyph.ticker})
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                            <div className="text-xs text-muted-foreground">
+                                                                {glyph.typeLabel}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="flex items-center gap-2 mt-2">
+                                                        <code className="text-xs bg-muted px-2 py-1 rounded break-all flex-1">
+                                                            {glyph.refShort}
+                                                        </code>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            onClick={() => copyToClipboard(glyph.refDisplay)}
+                                                        >
+                                                            <Copy className="h-3 w-3" />
+                                                        </Button>
+                                                    </div>
+                                                    <Button variant="outline" size="sm" className="mt-2 w-full" asChild>
+                                                        <a href={`/token/${glyph.refDisplay}`}>
+                                                            <ExternalLink className="h-3 w-3 mr-1" />
+                                                            View token journey
+                                                        </a>
+                                                    </Button>
+                                                </div>
+                                            );
+                                        })()}
                                         <div>
                                             <Label className="text-xs text-muted-foreground">Transaction</Label>
                                             <div className="flex items-center gap-2 mt-1">

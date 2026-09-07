@@ -1,11 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { Suspense, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Activity, Hash, Info } from 'lucide-react';
 import { CoinFlowAnalyzer } from '@/components/CoinFlowAnalyzer';
+
+/** Reads ?txid=&vout= so token-journey hops can deep-link into the tracer. */
+function AnalyzerWithParams() {
+    const searchParams = useSearchParams();
+    const txid = searchParams.get('txid') ?? undefined;
+    const voutRaw = searchParams.get('vout');
+    const vout = voutRaw !== null && /^\d+$/.test(voutRaw) ? Number(voutRaw) : undefined;
+    return <CoinFlowAnalyzer initialTxid={txid} initialVout={vout} />;
+}
 
 export default function HomePage() {
     const [activeTab, setActiveTab] = useState<'txid'>('txid');
@@ -95,7 +105,9 @@ export default function HomePage() {
                     <Hash className="w-5 h-5 text-primary" />
                     <h2 className="text-xl font-semibold">Analyze Coin Flow</h2>
                 </div>
-                <CoinFlowAnalyzer />
+                <Suspense fallback={<CoinFlowAnalyzer />}>
+                    <AnalyzerWithParams />
+                </Suspense>
             </div>
         </div>
     );
