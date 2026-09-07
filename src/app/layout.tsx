@@ -1,11 +1,22 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
+import { IBM_Plex_Mono, Space_Grotesk } from 'next/font/google';
 import { ThemeProvider } from 'next-themes';
 import { Toaster } from 'sonner';
 import { AppHeader } from '@/components/AppHeader';
 import './globals.css';
 
-const inter = Inter({ subsets: ['latin'] });
+const sans = Space_Grotesk({
+    subsets: ['latin'],
+    variable: '--font-sans',
+    display: 'swap',
+});
+
+const mono = IBM_Plex_Mono({
+    subsets: ['latin'],
+    variable: '--font-mono',
+    weight: ['400', '500', '600'],
+    display: 'swap',
+});
 
 export const metadata: Metadata = {
     metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'https://coinflow.rxd.zone'),
@@ -45,13 +56,13 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="en" suppressHydrationWarning>
-            <body className={inter.className}>
+            <body className={`${sans.variable} ${mono.variable}`}>
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
                     <div className="min-h-screen bg-background">
                         <AppHeader />
-                        <main className="container max-w-7xl mx-auto px-4 py-6">{children}</main>
-                        <footer className="border-t mt-12">
-                            <div className="container max-w-7xl mx-auto px-4 py-6 text-center text-sm text-muted-foreground">
+                        <main className="container max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 lg:py-12">{children}</main>
+                        <footer className="border-t mt-16">
+                            <div className="container max-w-7xl mx-auto px-4 py-8 text-center text-xs font-mono text-muted-foreground sm:px-6 lg:px-8">
                                 <p>
                                     CoinFlow Explorer •{' '}
                                     <a

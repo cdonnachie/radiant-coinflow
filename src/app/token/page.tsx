@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Loader2, Search, Sparkles } from 'lucide-react';
+import { Binary, Loader2, Search } from 'lucide-react';
 import { Ref } from '@/lib/glyph/ref';
 import { formatSupply } from '@/lib/glyph/supply';
 import type { GlyphSearchResult } from '@/types/glyph';
@@ -52,25 +52,23 @@ export default function TokenLandingPage() {
     };
 
     return (
-        <div className="space-y-8">
-            <div className="text-center space-y-4 py-8">
-                <div className="flex items-center justify-center gap-2">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                        <Sparkles className="w-6 h-6 text-primary" />
+        <div className="space-y-8 lg:space-y-12">
+            <section className="grid gap-6 border-b pb-8 lg:grid-cols-[minmax(0,0.8fr)_minmax(320px,1.2fr)] lg:items-end lg:pb-10">
+                <div>
+                    <div className="mb-4 flex items-center gap-2 font-mono text-[11px] uppercase text-primary">
+                        <Binary className="h-4 w-4" /> Glyph asset index
                     </div>
+                    <h1 className="text-4xl font-bold leading-tight sm:text-5xl">Token journey</h1>
                 </div>
-                <h1 className="text-4xl font-bold tracking-tight">
-                    Glyph <span className="text-primary">Token Journey</span>
-                </h1>
-                <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                <p className="max-w-2xl text-base leading-7 text-muted-foreground lg:justify-self-end lg:text-lg">
                     Follow a Glyphs token on the Radiant blockchain — from its mint, through
                     every transfer, to where it rests today.
                 </p>
-            </div>
+            </section>
 
-            <Card className="max-w-2xl mx-auto">
+            <Card className="max-w-3xl">
                 <CardHeader>
-                    <CardTitle className="text-base">Look up a token</CardTitle>
+                    <CardTitle className="text-base">Look up an asset</CardTitle>
                     <CardDescription>
                         Enter a token name, or its ref (the commit outpoint of its Glyph
                         deploy): 72-hex, <code>txid_vout</code>, or <code>txid:vout</code>.
@@ -109,7 +107,7 @@ export default function TokenLandingPage() {
             </Card>
 
             {results !== null && (
-                <div className="max-w-2xl mx-auto space-y-3">
+                <div className="max-w-3xl space-y-3">
                     {results.length === 0 ? (
                         <Card>
                             <CardContent className="py-10 text-center text-muted-foreground">

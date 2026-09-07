@@ -75,13 +75,16 @@ export default function PoolsPage() {
     }, []);
 
     return (
-        <div className="space-y-6">
-            <div className="space-y-2">
-                <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-                    <Pickaxe className="h-7 w-7 text-primary" />
-                    Mining Pool Payouts
-                </h1>
-                <p className="text-muted-foreground max-w-3xl">
+        <div className="space-y-8">
+            <section className="grid gap-5 border-b pb-8 lg:grid-cols-[minmax(0,0.75fr)_minmax(360px,1.25fr)] lg:items-end lg:pb-10">
+                <div>
+                    <div className="mb-4 flex items-center gap-2 font-mono text-[11px] uppercase text-primary">
+                        <Pickaxe className="h-4 w-4" /> Proof-of-work telemetry
+                    </div>
+                    <h1 className="text-4xl font-bold leading-tight sm:text-5xl">Mining pool payouts</h1>
+                </div>
+                <div className="lg:justify-self-end">
+                <p className="max-w-3xl text-base leading-7 text-muted-foreground lg:text-lg">
                     Block rewards flowing into each identified Radiant mining pool, and how they pay out —
                     directly to miners (many recipients per transaction) or by consolidating first. Figures
                     cover a recent window of each pool&apos;s activity.
@@ -92,7 +95,8 @@ export default function PoolsPage() {
                         Updated {new Date(data.generatedAt).toLocaleString()}
                     </p>
                 )}
-            </div>
+                </div>
+            </section>
 
             {loading && <p className="text-muted-foreground">Loading pool data…</p>}
 
