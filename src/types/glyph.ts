@@ -31,6 +31,17 @@ export interface GlyphMetadata {
     source: 'indexer' | 'decoded' | 'both' | 'none';
 }
 
+export interface GlyphSearchResult {
+    /** Canonical 72-hex display form — links to /token/[ref]. */
+    refDisplay: string;
+    refShort: string;
+    name?: string;
+    ticker?: string;
+    typeLabel: string;
+    deployHeight?: number;
+    supply?: { total?: string; minted?: string };
+}
+
 export interface JourneyHop {
     txid: string;
     /** Output index carrying the ref after this hop (absent for melt hops). */
