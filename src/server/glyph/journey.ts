@@ -76,31 +76,41 @@ function classifyCarrier(scriptHex: string, refScriptHex: string): 'singleton' |
 async function fetchHistoryTxids(ref: Ref): Promise<string[] | null> {
     const baseUrl = process.env.RADIANT_REST_URL;
     if (!baseUrl) return null;
+    const HISTORY_PAGE = 200; // the endpoint defaults to 100 rows — page explicitly
     try {
-        const res = await fetch(
-            `${baseUrl.replace(/\/+$/, '')}/tokens/${ref.toRxindexerForm()}/history`,
-            { signal: AbortSignal.timeout(HISTORY_TIMEOUT_MS) },
-        );
-        if (!res.ok) return null;
-        const body: unknown = await res.json();
-        if (!Array.isArray(body) || body.length === 0) return null;
-        const rows = body
-            .filter((r): r is { txid: string; height?: number; tx_idx?: number } =>
-                typeof r === 'object' && r !== null && typeof (r as { txid?: unknown }).txid === 'string')
-            .sort((a, b) => {
-                const ah = (a.height ?? 0) <= 0 ? Number.MAX_SAFE_INTEGER : a.height!;
-                const bh = (b.height ?? 0) <= 0 ? Number.MAX_SAFE_INTEGER : b.height!;
-                if (ah !== bh) return ah - bh;
-                return (a.tx_idx ?? 0) - (b.tx_idx ?? 0);
-            });
-        const txids: string[] = [];
-        for (const row of rows) {
-            if (txids[txids.length - 1] !== row.txid) txids.push(row.txid);
+        const rows: Array<{ txid: string; height?: number; tx_idx?: number }> = [];
+        for (let offset = 0; rows.length <= MAX_HOPS; offset += HISTORY_PAGE) {
+            const res = await fetch(
+                `${baseUrl.replace(/\/+$/, '')}/tokens/${ref.toRxindexerForm()}/history?limit=${HISTORY_PAGE}&offset=${offset}`,
+                { signal: AbortSignal.timeout(HISTORY_TIMEOUT_MS) },
+            );
+            if (!res.ok) return rows.length > 0 ? dedupeSorted(rows) : null;
+            const body: unknown = await res.json();
+            if (!Array.isArray(body)) return rows.length > 0 ? dedupeSorted(rows) : null;
+            rows.push(...body.filter(
+                (r): r is { txid: string; height?: number; tx_idx?: number } =>
+                    typeof r === 'object' && r !== null && typeof (r as { txid?: unknown }).txid === 'string',
+            ));
+            if (body.length < HISTORY_PAGE) break; // last page
         }
-        return txids.length > 0 ? txids : null;
+        return rows.length > 0 ? dedupeSorted(rows) : null;
     } catch {
         return null;
     }
+}
+
+function dedupeSorted(rows: Array<{ txid: string; height?: number; tx_idx?: number }>): string[] {
+    rows.sort((a, b) => {
+        const ah = (a.height ?? 0) <= 0 ? Number.MAX_SAFE_INTEGER : a.height!;
+        const bh = (b.height ?? 0) <= 0 ? Number.MAX_SAFE_INTEGER : b.height!;
+        if (ah !== bh) return ah - bh;
+        return (a.tx_idx ?? 0) - (b.tx_idx ?? 0);
+    });
+    const txids: string[] = [];
+    for (const row of rows) {
+        if (txids[txids.length - 1] !== row.txid) txids.push(row.txid);
+    }
+    return txids;
 }
 
 interface WalkState {

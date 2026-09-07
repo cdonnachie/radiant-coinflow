@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { ArrowRight, Copy, ExternalLink, Flame, Loader2, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { formatSupply } from '@/lib/glyph/supply';
 import type { GlyphMetadata, JourneyHop, TokenJourney as TokenJourneyData } from '@/types/glyph';
 
 interface TokenJourneyProps {
@@ -234,7 +235,9 @@ export const TokenJourney: React.FC<TokenJourneyProps> = ({ refDisplay }) => {
                             )}
                             {meta?.supply?.total && (meta.tokenType === 'ft' || meta.tokenType === 'dmint') && (
                                 <div className="text-xs text-muted-foreground mt-1">
-                                    Supply: {meta.supply.minted ?? '?'} / {meta.supply.total}
+                                    Minted: {formatSupply(meta.supply.minted ?? '?', meta.decimals)} of{' '}
+                                    {formatSupply(meta.supply.total, meta.decimals)} max
+                                    {meta.supply.minted === meta.supply.total && ' — fully minted'}
                                 </div>
                             )}
                         </div>

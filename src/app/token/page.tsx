@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Loader2, Search, Sparkles } from 'lucide-react';
 import { Ref } from '@/lib/glyph/ref';
+import { formatSupply } from '@/lib/glyph/supply';
 import type { GlyphSearchResult } from '@/types/glyph';
 
 export default function TokenLandingPage() {
@@ -156,7 +157,7 @@ export default function TokenLandingPage() {
                                                 <div className="text-xs text-muted-foreground mt-0.5">
                                                     {r.deployHeight && <>Deployed at block #{r.deployHeight}</>}
                                                     {r.supply?.total && (
-                                                        <> • Supply: {r.supply.minted ?? '?'} / {r.supply.total}</>
+                                                        <> • Minted: {formatSupply(r.supply.minted ?? '?')} of {formatSupply(r.supply.total)}</>
                                                     )}
                                                 </div>
                                             </div>
