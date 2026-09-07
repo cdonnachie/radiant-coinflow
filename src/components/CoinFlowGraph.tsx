@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useCallback, useMemo, useEffect, useState } from 'react';
-import { formatRxd, photonsToNumber } from '@/lib/amounts';
+import { photonsToNumber } from '@/lib/amounts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -34,7 +34,8 @@ import ReactFlow, {
 import { Activity, Download, Map, Maximize2, Minimize2, X, Copy, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
 import type { CoinFlowGraph, CoinFlowNode } from '@/types/coinFlow';
-import type { GlyphMetadata } from '@/types/glyph';
+import type { GlyphMetadata, TokenAssetInfo } from '@/types/glyph';
+import { formatAssetAmount } from '@/lib/glyph/supply';
 import { ClusteringMethod } from '@/types/coinFlow';
 import { graphlib, layout } from '@dagrejs/dagre';
 import { toPng } from 'html-to-image';
@@ -47,6 +48,8 @@ interface CoinFlowGraphVisualizationProps {
     height?: string;
     /** Glyph metadata keyed by 72-hex display ref (from GlyphMetadataService). */
     glyphMeta?: Record<string, GlyphMetadata>;
+    /** Token-flow mode: amounts are units of this asset instead of RXD. */
+    asset?: TokenAssetInfo;
 }
 
 /** First resolved glyph among a node's refs (aggregate nodes can mix tokens). */
@@ -94,8 +97,9 @@ const GlyphBadge: React.FC<{ node: CoinFlowNode; glyph?: GlyphMetadata }> = ({ n
 const CoinFlowNodeComponent = ({
     data,
     selected,
-}: NodeProps<{ nodeData: CoinFlowNode; onSelect: () => void; glyph?: GlyphMetadata }>) => {
+}: NodeProps<{ nodeData: CoinFlowNode; onSelect: () => void; glyph?: GlyphMetadata; asset?: TokenAssetInfo }>) => {
     const getNodeColor = (node: CoinFlowNode): string => {
+        if (node.isBurn) return '#ef4444';
         if (node.isAggregate) return '#94a3b8';
         if (node.isStarting) return '#3b82f6';
         if (node.wallet?.isOwnWallet) return '#8b5cf6';
@@ -105,7 +109,7 @@ const CoinFlowNodeComponent = ({
         return '#6b7280';
     };
 
-    const formatAmount = (amount: bigint): string => formatRxd(amount) + ' RXD';
+    const formatAmount = (amount: bigint): string => formatAssetAmount(amount, data.asset);
 
     const nodeData = data.nodeData as CoinFlowNode;
     const color = getNodeColor(nodeData);
@@ -144,8 +148,9 @@ const CoinFlowNodeComponent = ({
                     style={{ backgroundColor: color }}
                 />
                 <div className="text-xs font-medium text-gray-600">
+                    {nodeData.isBurn && 'Burned'}
                     {nodeData.isAggregate && 'Collapsed'}
-                    {!nodeData.isAggregate && nodeData.isStarting && 'Start'}
+                    {!nodeData.isBurn && !nodeData.isAggregate && nodeData.isStarting && 'Start'}
                     {!nodeData.isAggregate && nodeData.wallet?.isOwnWallet && 'Your Wallet'}
                     {nodeData.wallet?.serviceName &&
                         !nodeData.isStarting &&
@@ -291,12 +296,13 @@ const ReactFlowVisualization: React.FC<{
 );
 
 // Node Details Card used in fullscreen dialog
-const NodeDetailsCard: React.FC<{ node: CoinFlowNode; glyph?: GlyphMetadata; onClose?: () => void }> = ({
+const NodeDetailsCard: React.FC<{ node: CoinFlowNode; glyph?: GlyphMetadata; asset?: TokenAssetInfo; onClose?: () => void }> = ({
     node,
     glyph,
+    asset,
     onClose,
 }) => {
-    const formatAmount = (amount: bigint) => formatRxd(amount) + ' RXD';
+    const formatAmount = (amount: bigint) => formatAssetAmount(amount, asset);
 
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
@@ -479,6 +485,7 @@ export const CoinFlowGraphVisualization: React.FC<CoinFlowGraphVisualizationProp
     onNodeSelect,
     height = '600px',
     glyphMeta,
+    asset,
 }) => {
     const [showMiniMap, setShowMiniMap] = useState(false);
     const [isFullscreen, setIsFullscreen] = useState(false);
@@ -487,7 +494,7 @@ export const CoinFlowGraphVisualization: React.FC<CoinFlowGraphVisualizationProp
     const [isExporting, setIsExporting] = useState(false);
     const [forceRender, setForceRender] = useState(false);
 
-    const formatAmount = (amount: bigint) => formatRxd(amount) + ' RXD';
+    const formatAmount = (amount: bigint) => formatAssetAmount(amount, asset);
 
     const { nodes: flowNodes, edges: flowEdges } = useMemo(() => {
         const nodes: Node[] = [];
@@ -502,6 +509,7 @@ export const CoinFlowGraphVisualization: React.FC<CoinFlowGraphVisualizationProp
                     nodeData: node,
                     onSelect: () => onNodeSelect(node.id),
                     glyph: findNodeGlyph(node, glyphMeta),
+                    asset,
                 },
                 selected: selectedNode === node.id,
                 sourcePosition: Position.Bottom,
@@ -530,7 +538,10 @@ export const CoinFlowGraphVisualization: React.FC<CoinFlowGraphVisualizationProp
             if (!sourceNode || !targetNode) return;
 
             const edgeId = edge.id || `${edge.from}->${edge.to}-${index}`;
-            const amountInRxd = photonsToNumber(edge.amount) / 100000000;
+            // Whole-unit value: token units when tracing an asset, RXD otherwise.
+            const amountInRxd = asset
+                ? photonsToNumber(edge.amount) / 10 ** (asset.decimals ?? 0)
+                : photonsToNumber(edge.amount) / 100000000;
             const logAmount = Math.log10(amountInRxd + 0.001);
             const normalized = (logAmount - Math.log10(0.001)) / (Math.log10(1000) - Math.log10(0.001));
             const strokeWidth = Math.max(2, Math.min(16, 2 + normalized * 14));
@@ -571,7 +582,7 @@ export const CoinFlowGraphVisualization: React.FC<CoinFlowGraphVisualizationProp
         });
 
         return getLayoutedElements(nodes, edges, 'TB');
-    }, [graph, selectedNode, onNodeSelect, glyphMeta]);
+    }, [graph, selectedNode, onNodeSelect, glyphMeta, asset]);
 
     const [nodes, setNodes, onNodesChange] = useNodesState([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -579,7 +590,7 @@ export const CoinFlowGraphVisualization: React.FC<CoinFlowGraphVisualizationProp
     useEffect(() => {
         setNodes(flowNodes);
         setEdges(flowEdges);
-    }, [graph, selectedNode, glyphMeta, setNodes, setEdges]);
+    }, [graph, selectedNode, glyphMeta, asset, setNodes, setEdges]);
 
     useEffect(() => {
         if (selectedNode && graph) {
@@ -819,6 +830,7 @@ export const CoinFlowGraphVisualization: React.FC<CoinFlowGraphVisualizationProp
                                             <NodeDetailsCard
                                                 node={selectedNodeDetails}
                                                 glyph={findNodeGlyph(selectedNodeDetails, glyphMeta)}
+                                                asset={asset}
                                                 onClose={() => setShowNodeDetails(false)}
                                             />
                                         )}

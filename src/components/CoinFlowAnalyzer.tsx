@@ -24,7 +24,10 @@ import {
     Settings,
     Copy,
     ExternalLink,
+    Sparkles,
+    X,
 } from 'lucide-react';
+import Link from 'next/link';
 import { toast } from 'sonner';
 import { OptimizedCoinFlowService } from '@/services/OptimizedCoinFlowService';
 import { RadiantChainService } from '@/services/RadiantChainService';
@@ -32,7 +35,8 @@ import type { AddressUtxo } from '@/services/ChainDataService';
 import { formatRxd } from '@/lib/amounts';
 import { CoinFlowGraphVisualization } from '@/components/CoinFlowGraph';
 import { getGlyphMetadataMany } from '@/services/GlyphMetadataService';
-import type { GlyphMetadata } from '@/types/glyph';
+import { formatAssetAmount } from '@/lib/glyph/supply';
+import type { GlyphMetadata, TokenAssetInfo } from '@/types/glyph';
 import type {
     CoinFlowAnalysisResult,
     CoinFlowNode,
@@ -42,11 +46,14 @@ import type {
 interface CoinFlowAnalyzerProps {
     initialTxid?: string;
     initialVout?: number;
+    /** Token-flow mode: trace only outputs carrying this Glyph ref (72-hex display). */
+    initialTokenRef?: string;
 }
 
 export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
     initialTxid = '',
     initialVout = 0,
+    initialTokenRef,
 }) => {
     const coinFlowService = useMemo(() => new OptimizedCoinFlowService(), []);
 
@@ -61,6 +68,7 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
     const [selectedNodeDetails, setSelectedNodeDetails] = useState<CoinFlowNode | null>(null);
     const [showSettings, setShowSettings] = useState(false);
     const [glyphMeta, setGlyphMeta] = useState<Record<string, GlyphMetadata>>({});
+    const [tokenAsset, setTokenAsset] = useState<TokenAssetInfo | null>(null);
 
     const [inputMode, setInputMode] = useState<'txid' | 'address'>('txid');
     const [addressInput, setAddressInput] = useState('');
@@ -88,6 +96,32 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
         setTxid(initialTxid || '');
         setVout(initialVout || 0);
     }, [initialTxid, initialVout]);
+
+    // Token-flow mode: resolve the traced asset's display info once.
+    useEffect(() => {
+        if (!initialTokenRef) {
+            setTokenAsset(null);
+            return;
+        }
+        let cancelled = false;
+        getGlyphMetadataMany([initialTokenRef]).then((meta) => {
+            if (cancelled) return;
+            const m = meta[initialTokenRef];
+            setTokenAsset({
+                refDisplay: initialTokenRef,
+                name: m?.name,
+                ticker: m?.ticker,
+                decimals: m?.decimals,
+                typeLabel: m?.typeLabel ?? 'Token',
+                hasIcon: m?.hasIcon,
+            });
+        });
+        return () => {
+            cancelled = true;
+        };
+    }, [initialTokenRef]);
+
+    const asset = tokenAsset ?? undefined;
 
     useEffect(() => {
         if (selectedNode && result) {
@@ -130,7 +164,10 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
                 setAnalysisProgress((prev) => Math.min(prev + 10, 90));
             }, 500);
 
-            const analysisResult = await coinFlowService.analyzeCoinFlow(effectiveTxid, effectiveVout, options);
+            const analysisResult = await coinFlowService.analyzeCoinFlow(effectiveTxid, effectiveVout, {
+                ...options,
+                tokenRef: tokenAsset?.refDisplay,
+            });
 
             clearInterval(progressInterval);
             setAnalysisProgress(100);
@@ -164,7 +201,7 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
             setIsAnalyzing(false);
             setAnalysisProgress(0);
         }
-    }, [coinFlowService, txid, vout, options]);
+    }, [coinFlowService, txid, vout, options, tokenAsset]);
 
     const handleAddressLookup = useCallback(async () => {
         if (!addressInput.trim()) {
@@ -222,7 +259,7 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
         });
     }, [coinFlowService]);
 
-    const formatAmount = (amount: bigint): string => formatRxd(amount) + ' RXD';
+    const formatAmount = (amount: bigint): string => formatAssetAmount(amount, asset);
 
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
@@ -231,6 +268,48 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
 
     return (
         <div className="flex flex-col gap-4 w-full">
+            {/* Token-flow mode banner */}
+            {tokenAsset && (
+                <Card className="border-primary/40 bg-primary/5">
+                    <CardContent className="py-3 flex items-center gap-3">
+                        {tokenAsset.hasIcon ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                                src={`/api/glyph/${tokenAsset.refDisplay}/icon`}
+                                alt=""
+                                className="w-10 h-10 rounded-lg object-cover flex-shrink-0"
+                                onError={(e) => {
+                                    (e.target as HTMLImageElement).hidden = true;
+                                }}
+                            />
+                        ) : (
+                            <Sparkles className="w-6 h-6 text-primary flex-shrink-0" />
+                        )}
+                        <div className="min-w-0 flex-1">
+                            <div className="text-sm font-medium flex items-center gap-2 flex-wrap">
+                                Tracing token flow: {tokenAsset.name || tokenAsset.ticker || 'Glyph token'}
+                                {tokenAsset.ticker && tokenAsset.name && (
+                                    <span className="text-muted-foreground">({tokenAsset.ticker})</span>
+                                )}
+                                <Badge variant="outline">{tokenAsset.typeLabel}</Badge>
+                            </div>
+                            <div className="text-xs text-muted-foreground mt-0.5">
+                                Only outputs carrying this token&apos;s ref are followed; amounts are
+                                token units. Partial burns are not itemized.
+                            </div>
+                        </div>
+                        <Button variant="ghost" size="sm" asChild>
+                            <Link href={`/token/${tokenAsset.refDisplay}`}>View journey</Link>
+                        </Button>
+                        <Button variant="ghost" size="sm" asChild title="Exit token mode (trace RXD)">
+                            <Link href={txid ? `/?txid=${txid}&vout=${vout}` : '/'}>
+                                <X className="h-4 w-4" />
+                            </Link>
+                        </Button>
+                    </CardContent>
+                </Card>
+            )}
+
             {/* Input Section */}
             <Card>
                 <CardHeader>
@@ -555,6 +634,7 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
                                     onNodeSelect={setSelectedNode}
                                     height="600px"
                                     glyphMeta={glyphMeta}
+                                    asset={asset}
                                 />
                             </div>
 

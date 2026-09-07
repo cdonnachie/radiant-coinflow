@@ -72,45 +72,87 @@ function classifyCarrier(scriptHex: string, refScriptHex: string): 'singleton' |
     return 'unknown';
 }
 
-/** Ordered txid chain from RXinDexer's /tokens/{ref}/history; null when unavailable. */
-async function fetchHistoryTxids(ref: Ref): Promise<string[] | null> {
-    const baseUrl = process.env.RADIANT_REST_URL;
+interface ChainSource {
+    txids: string[];
+    /** Indexer deliberately dropped intermediate transfers (mint/melt only). */
+    filtered: boolean;
+    note?: string;
+}
+
+/**
+ * Ordered txid chain from RXinDexer's /tokens/{ref}/locations (rows already in
+ * chain order: height, then tx_index — no client-side sorting), falling back to
+ * the older /tokens/{ref}/history on deployments without it. Null when neither
+ * is available.
+ */
+async function fetchChainSource(ref: Ref): Promise<ChainSource | null> {
+    const baseUrl = process.env.RADIANT_REST_URL?.replace(/\/+$/, '');
     if (!baseUrl) return null;
-    const HISTORY_PAGE = 200; // the endpoint defaults to 100 rows — page explicitly
+    const PAGE = 200;
+    const refPath = `${baseUrl}/tokens/${ref.toRxindexerForm()}`;
+
+    // Primary: /locations (cursor-paged, sorted, carries `filtered` + `note`).
+    try {
+        const txids: string[] = [];
+        let filtered = false;
+        let note: string | undefined;
+        let cursor: string | undefined;
+        let ok = false;
+        for (let page = 0; txids.length <= MAX_HOPS; page++) {
+            const url = `${refPath}/locations?limit=${PAGE}${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`;
+            const res = await fetch(url, { signal: AbortSignal.timeout(HISTORY_TIMEOUT_MS) });
+            if (!res.ok) break;
+            const body = await res.json() as {
+                rows?: unknown; next_cursor?: unknown; filtered?: unknown; note?: unknown;
+            };
+            if (!Array.isArray(body?.rows)) break;
+            ok = true;
+            if (body.filtered === true) filtered = true;
+            if (typeof body.note === 'string' && !note) note = body.note;
+            for (const row of body.rows) {
+                const txid = (row as { txid?: unknown })?.txid;
+                if (typeof txid === 'string' && txids[txids.length - 1] !== txid) txids.push(txid);
+            }
+            if (typeof body.next_cursor !== 'string' || body.next_cursor.length === 0) break;
+            cursor = body.next_cursor;
+        }
+        if (ok && txids.length > 0) return { txids, filtered, note };
+    } catch {
+        // fall through to /history
+    }
+
+    // Fallback: /history (offset-paged plain array; sort defensively).
     try {
         const rows: Array<{ txid: string; height?: number; tx_idx?: number }> = [];
-        for (let offset = 0; rows.length <= MAX_HOPS; offset += HISTORY_PAGE) {
+        for (let offset = 0; rows.length <= MAX_HOPS; offset += PAGE) {
             const res = await fetch(
-                `${baseUrl.replace(/\/+$/, '')}/tokens/${ref.toRxindexerForm()}/history?limit=${HISTORY_PAGE}&offset=${offset}`,
+                `${refPath}/history?limit=${PAGE}&offset=${offset}`,
                 { signal: AbortSignal.timeout(HISTORY_TIMEOUT_MS) },
             );
-            if (!res.ok) return rows.length > 0 ? dedupeSorted(rows) : null;
+            if (!res.ok) break;
             const body: unknown = await res.json();
-            if (!Array.isArray(body)) return rows.length > 0 ? dedupeSorted(rows) : null;
+            if (!Array.isArray(body)) break;
             rows.push(...body.filter(
                 (r): r is { txid: string; height?: number; tx_idx?: number } =>
                     typeof r === 'object' && r !== null && typeof (r as { txid?: unknown }).txid === 'string',
             ));
-            if (body.length < HISTORY_PAGE) break; // last page
+            if (body.length < PAGE) break;
         }
-        return rows.length > 0 ? dedupeSorted(rows) : null;
+        if (rows.length === 0) return null;
+        rows.sort((a, b) => {
+            const ah = (a.height ?? 0) <= 0 ? Number.MAX_SAFE_INTEGER : a.height!;
+            const bh = (b.height ?? 0) <= 0 ? Number.MAX_SAFE_INTEGER : b.height!;
+            if (ah !== bh) return ah - bh;
+            return (a.tx_idx ?? 0) - (b.tx_idx ?? 0);
+        });
+        const txids: string[] = [];
+        for (const row of rows) {
+            if (txids[txids.length - 1] !== row.txid) txids.push(row.txid);
+        }
+        return { txids, filtered: false };
     } catch {
         return null;
     }
-}
-
-function dedupeSorted(rows: Array<{ txid: string; height?: number; tx_idx?: number }>): string[] {
-    rows.sort((a, b) => {
-        const ah = (a.height ?? 0) <= 0 ? Number.MAX_SAFE_INTEGER : a.height!;
-        const bh = (b.height ?? 0) <= 0 ? Number.MAX_SAFE_INTEGER : b.height!;
-        if (ah !== bh) return ah - bh;
-        return (a.tx_idx ?? 0) - (b.tx_idx ?? 0);
-    });
-    const txids: string[] = [];
-    for (const row of rows) {
-        if (txids[txids.length - 1] !== row.txid) txids.push(row.txid);
-    }
-    return txids;
 }
 
 interface WalkState {
@@ -119,7 +161,15 @@ interface WalkState {
     startedAt: number;
     /** Carrying outpoint of the last hop pushed (chain linkage anchor). */
     lastOutpoint?: { txid: string; vout: number };
+    /** Filtered chain source: hop gaps are deliberate, skip linkage warnings. */
+    expectGaps?: boolean;
     done: boolean;
+}
+
+/** 'transfer' when ownership changed; 'move' for same-owner re-creations or unknowns. */
+function classifyEvent(prevHolder: string | undefined, holder: string | undefined): 'transfer' | 'move' {
+    if (!prevHolder || !holder) return 'move';
+    return prevHolder === holder ? 'move' : 'transfer';
 }
 
 /**
@@ -157,12 +207,13 @@ async function processChainTx(state: WalkState, ref: Ref, txid: string): Promise
     }
 
     // Linkage: this tx must spend the previous carrying outpoint (the commit
-    // outpoint for the reveal). A miss means the chain source skipped a hop.
+    // outpoint for the reveal). A miss means the chain source skipped a hop —
+    // unless the source is filtered, where gaps are deliberate.
     const expected = isFirst
         ? { txid: ref.txidDisplay, vout: ref.vout }
         : state.lastOutpoint!;
     const linked = (tx.vin ?? []).some((v) => v.txid === expected.txid && v.vout === expected.vout);
-    if (!linked) {
+    if (!linked && !(state.expectGaps && !isFirst)) {
         journey.notes.push(
             isFirst
                 ? 'Reveal transaction does not spend the commit outpoint — linkage unverified.'
@@ -177,13 +228,15 @@ async function processChainTx(state: WalkState, ref: Ref, txid: string): Promise
             : 'unknown';
     }
 
+    const holderInfo = holderOf(carrying);
+    const prevHolder = journey.hops[journey.hops.length - 1]?.holder;
     journey.hops.push({
         txid,
         vout: carrying.n,
         height: tx.height,
         timestamp: tx.blocktime,
-        event: isFirst ? 'mint' : 'transfer',
-        ...holderOf(carrying),
+        event: isFirst ? 'mint' : classifyEvent(prevHolder, holderInfo.holder),
+        ...holderInfo,
     });
     state.lastOutpoint = { txid, vout: carrying.n };
 
@@ -194,7 +247,7 @@ async function processChainTx(state: WalkState, ref: Ref, txid: string): Promise
 }
 
 /** Continue past the known chain via getspentinfo until unspent/melt/limits. */
-async function continueBySpendWalk(state: WalkState, ref: Ref, trustEndAsActive: boolean): Promise<void> {
+async function continueBySpendWalk(state: WalkState, ref: Ref): Promise<void> {
     const { journey } = state;
     while (!state.done && journey.hops.length < MAX_HOPS) {
         if (Date.now() - state.startedAt > TIME_BUDGET_MS) {
@@ -218,14 +271,8 @@ async function continueBySpendWalk(state: WalkState, ref: Ref, trustEndAsActive:
                 journey.liveness = 'ACTIVE';
                 return;
             }
-            if (trustEndAsActive) {
-                // The indexer's token history already ended here — treat the
-                // failed spent lookup as confirmation, not an error.
-                journey.liveness = 'ACTIVE';
-            } else {
-                journey.notes.push(`Spent lookup failed at ${outpoint.txid}:${outpoint.vout}: ${error instanceof Error ? error.message : error}`);
-                journey.truncated = true;
-            }
+            journey.notes.push(`Spent lookup failed at ${outpoint.txid}:${outpoint.vout}: ${error instanceof Error ? error.message : error}`);
+            journey.truncated = true;
             return;
         }
 
@@ -259,9 +306,26 @@ export async function walkTokenJourney(ref: Ref): Promise<TokenJourney> {
     };
 
     // Primary path: indexer-provided txid chain, verified hop by hop.
-    const historyTxids = await fetchHistoryTxids(ref);
-    if (historyTxids) {
-        for (const txid of historyTxids.slice(0, MAX_HOPS)) {
+    const source = await fetchChainSource(ref);
+    if (source) {
+        if (source.filtered) {
+            journey.filtered = true;
+            state.expectGaps = true;
+            journey.notes.push(source.note
+                ?? 'Intermediate transfers are not indexed for this ref — only its mint and melt are shown.');
+        }
+        // Prefetch the whole chain in parallel batches — the backend caches
+        // transactions, so the sequential verification pass below is then
+        // cache-hits instead of one round-trip per hop.
+        const chainTxids = source.txids.slice(0, MAX_HOPS);
+        const PREFETCH_BATCH = 10;
+        for (let i = 0; i < chainTxids.length; i += PREFETCH_BATCH) {
+            if (Date.now() - state.startedAt > TIME_BUDGET_MS) break;
+            await Promise.all(chainTxids.slice(i, i + PREFETCH_BATCH).map((t) =>
+                getChainBackend().call('getrawtransaction', [t]).catch(() => null)));
+        }
+
+        for (const txid of chainTxids) {
             if (state.done) break;
             if (Date.now() - state.startedAt > TIME_BUDGET_MS) {
                 journey.truncated = true;
@@ -270,15 +334,17 @@ export async function walkTokenJourney(ref: Ref): Promise<TokenJourney> {
             }
             await processChainTx(state, ref, txid);
         }
-        if (historyTxids.length > MAX_HOPS) {
+        if (source.txids.length > MAX_HOPS) {
             journey.truncated = true;
             journey.notes.push(`Walk stopped at the ${MAX_HOPS}-hop cap; history is incomplete.`);
             return journey;
         }
-        if (!state.done && journey.hops.length > 0) {
-            // Extend past the indexer's last row in case it lags the chain;
-            // a failed lookup there still counts as resting (history ended).
-            await continueBySpendWalk(state, ref, true);
+        // No spend-walk continuation here: the indexer is synced, so its last
+        // row IS the resting place — and a getspentinfo on a busy holder can
+        // take minutes (address-scan). Melt rows already set MELTED above.
+        // Filtered refs (mint/melt only) stay UNKNOWN unless a melt was seen.
+        if (!state.done && journey.hops.length > 0 && !source.filtered && !journey.truncated) {
+            journey.liveness = 'ACTIVE';
         }
         return journey;
     }
@@ -292,7 +358,7 @@ export async function walkTokenJourney(ref: Ref): Promise<TokenJourney> {
     }
     await processChainTx(state, ref, meta.deployTxid);
     if (!state.done && journey.hops.length > 0) {
-        await continueBySpendWalk(state, ref, false);
+        await continueBySpendWalk(state, ref);
     }
     return journey;
 }

@@ -31,6 +31,23 @@ export interface GlyphMetadata {
     source: 'indexer' | 'decoded' | 'both' | 'none';
 }
 
+/** Minimal asset descriptor for token-flow tracing UI (label + decimals). */
+export interface TokenAssetInfo {
+    refDisplay: string;
+    name?: string;
+    ticker?: string;
+    decimals?: number;
+    typeLabel: string;
+    hasIcon?: boolean;
+}
+
+/** Top holders of a fungible token; amounts are raw units (photons). */
+export interface TokenHolders {
+    holders: Array<{ address: string; amount: string; percentage?: number }>;
+    holderCount?: number;
+    totalSupply?: string;
+}
+
 export interface GlyphSearchResult {
     /** Canonical 72-hex display form — links to /token/[ref]. */
     refDisplay: string;
@@ -48,7 +65,9 @@ export interface JourneyHop {
     vout?: number;
     height?: number;
     timestamp?: number;
-    event: 'mint' | 'transfer' | 'melt';
+    /** 'transfer' = holder changed; 'move' = same owner re-created the outpoint
+     *  (consolidation/state/fees) or holder unknown. */
+    event: 'mint' | 'transfer' | 'move' | 'melt';
     /** Holder address, or `contract:<scripthash8>` for pure contract outputs. */
     holder?: string;
     isContract?: boolean;
@@ -63,5 +82,8 @@ export interface TokenJourney {
     liveness: 'ACTIVE' | 'MELTED' | 'UNKNOWN';
     /** True when the walk hit the hop cap or time budget. */
     truncated: boolean;
+    /** True when the indexer deliberately dropped intermediate transfers for
+     *  this ref (dMint mining contracts) — only mint and melt are shown. */
+    filtered?: boolean;
     notes: string[];
 }

@@ -21,6 +21,9 @@ import type {
 import { ClusteringMethod } from '@/types/coinFlow';
 import { Ref } from '@/lib/glyph/ref';
 
+/** All options defaulted except tokenRef, which stays optional (absent = RXD mode). */
+type ResolvedCoinFlowOptions = Required<Omit<CoinFlowOptions, 'tokenRef'>> & { tokenRef?: string };
+
 /** Script-form 72-hex refs → canonical display form; malformed entries dropped. */
 function refsToDisplay(refs?: string[]): string[] | undefined {
     if (!refs?.length) return undefined;
@@ -79,7 +82,7 @@ export class OptimizedCoinFlowService {
     private async performOptimizedAnalysis(
         txid: string,
         vout: number,
-        opts: Required<CoinFlowOptions>,
+        opts: ResolvedCoinFlowOptions,
         startTime: number,
     ): Promise<CoinFlowAnalysisResult> {
         const startingTx = await this.apiService.getTransaction(txid);
@@ -95,6 +98,9 @@ export class OptimizedCoinFlowService {
 
         if (!startingIdentity) {
             throw new Error(`Could not extract address from output ${vout}`);
+        }
+        if (opts.tokenRef && !startingIdentity.refs?.includes(opts.tokenRef)) {
+            throw new Error(`Output ${txid}:${vout} does not carry the selected token ref`);
         }
 
         const graph: CoinFlowGraph = {
@@ -147,7 +153,7 @@ export class OptimizedCoinFlowService {
     private async traceFlowOptimized(
         graph: CoinFlowGraph,
         currentNode: CoinFlowNode,
-        options: Required<CoinFlowOptions>,
+        options: ResolvedCoinFlowOptions,
         visitedTxIds: Set<string>,
         currentDepth: number,
     ): Promise<void> {
@@ -205,11 +211,46 @@ export class OptimizedCoinFlowService {
                 const output = spendingTx.vout[i];
                 const identity = this.extractOutputIdentity(output);
                 if (!identity) continue;
+                // Token-flow mode: only outputs that carry the traced ref move
+                // the token; everything else in this tx is RXD change/fees.
+                if (options.tokenRef && !identity.refs?.includes(options.tokenRef)) continue;
                 // Token/contract outputs carry dust-level RXD by design —
                 // never dust-filter them or token flows disappear.
                 const isTokenLike = identity.hasRefs || identity.isContract;
                 if (!options.includeDust && !isTokenLike && output.valueSat <= BigInt(options.dustThreshold)) continue;
                 candidates.push({ index: i, identity, amount: output.valueSat });
+            }
+
+            // Token-flow mode: a spender that re-emits the ref nowhere burned
+            // the units — their photons became plain RXD. Terminal event.
+            if (options.tokenRef && candidates.length === 0) {
+                const burnId = `${spendingTx.hash}:burn`;
+                if (!graph.nodes.find((n) => n.id === burnId)) {
+                    const burnHeight = (spentInfo.height ?? spendingTx.height) || undefined;
+                    graph.nodes.push({
+                        id: burnId,
+                        txid: spendingTx.hash,
+                        vout: -1,
+                        address: 'Burned — units converted to plain RXD',
+                        amount: currentNode.amount,
+                        blockHeight: burnHeight,
+                        confirmations: spendingTx.confirmations,
+                        isUnspent: false,
+                        depth: currentDepth + 1,
+                        isBurn: true,
+                    });
+                    graph.edges.push({
+                        id: `${currentNode.id}->${burnId}`,
+                        from: currentNode.id,
+                        to: burnId,
+                        txid: spendingTx.hash,
+                        amount: currentNode.amount,
+                        blockHeight: burnHeight,
+                        timestamp: spendingTx.blocktime ? new Date(spendingTx.blocktime * 1000) : undefined,
+                    });
+                    graph.metadata.actualMaxDepth = Math.max(graph.metadata.actualMaxDepth, currentDepth + 1);
+                }
+                return;
             }
 
             candidates.sort((a, b) => (b.amount > a.amount ? 1 : b.amount < a.amount ? -1 : 0));
@@ -292,7 +333,7 @@ export class OptimizedCoinFlowService {
     private async performBackwardAnalysis(
         txid: string,
         vout: number,
-        opts: Required<CoinFlowOptions>,
+        opts: ResolvedCoinFlowOptions,
         startTime: number,
     ): Promise<CoinFlowAnalysisResult> {
         const startingTx = await this.apiService.getTransaction(txid);
@@ -372,7 +413,7 @@ export class OptimizedCoinFlowService {
     private async traceBackwardsOptimized(
         graph: CoinFlowGraph,
         currentNode: CoinFlowNode,
-        options: Required<CoinFlowOptions>,
+        options: ResolvedCoinFlowOptions,
         visitedTxIds: Set<string>,
         currentDepth: number,
     ): Promise<void> {
@@ -427,6 +468,8 @@ export class OptimizedCoinFlowService {
                 if (!sourceOutput) continue;
                 const identity = this.extractOutputIdentity(sourceOutput);
                 if (!identity) continue;
+                // Token-flow mode: only ref-carrying sources contributed token units.
+                if (options.tokenRef && !identity.refs?.includes(options.tokenRef)) continue;
                 if (options.confirmedOnly && sourceTx.confirmations < options.minConfirmations) continue;
                 const isTokenLike = identity.hasRefs || identity.isContract;
                 if (!options.includeDust && !isTokenLike && sourceOutput.valueSat <= BigInt(options.dustThreshold)) continue;
@@ -650,7 +693,7 @@ export class OptimizedCoinFlowService {
     }
 
 
-    private getDefaultOptions(options: CoinFlowOptions): Required<CoinFlowOptions> {
+    private getDefaultOptions(options: CoinFlowOptions): ResolvedCoinFlowOptions {
         const isBackward = options.direction === 'backward';
 
         // Backward tracing has no natural termination (only stops at coinbase), so

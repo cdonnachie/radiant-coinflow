@@ -38,6 +38,8 @@ export interface CoinFlowNode {
     isContract?: boolean;
     /** Aggregate node collapsing N small sibling outputs/sources (not traced further) */
     isAggregate?: boolean;
+    /** Token-flow mode: terminal node for units burned (spent without re-emitting the ref) */
+    isBurn?: boolean;
     /** Number of outputs/sources folded into this aggregate node */
     aggregateCount?: number;
 }
@@ -154,6 +156,10 @@ export interface CoinFlowOptions {
     /** Max sibling outputs/sources shown per transaction before collapsing the
      *  rest into a single "+N more" aggregate node (default 8). Bounds graph width. */
     maxOutputsPerTx?: number;
+    /** Token-flow mode: follow only outputs carrying this Glyph ref (72-hex
+     *  display form). Amounts are then token units — for Glyphs FTs the
+     *  photons ARE the token units. */
+    tokenRef?: string;
 }
 
 export interface CoinFlowAnalysisResult {

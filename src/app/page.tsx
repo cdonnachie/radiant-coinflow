@@ -8,13 +8,15 @@ import { Badge } from '@/components/ui/badge';
 import { Activity, Hash, Info } from 'lucide-react';
 import { CoinFlowAnalyzer } from '@/components/CoinFlowAnalyzer';
 
-/** Reads ?txid=&vout= so token-journey hops can deep-link into the tracer. */
+/** Reads ?txid=&vout=&token= so token pages can deep-link into the tracer. */
 function AnalyzerWithParams() {
     const searchParams = useSearchParams();
     const txid = searchParams.get('txid') ?? undefined;
     const voutRaw = searchParams.get('vout');
     const vout = voutRaw !== null && /^\d+$/.test(voutRaw) ? Number(voutRaw) : undefined;
-    return <CoinFlowAnalyzer initialTxid={txid} initialVout={vout} />;
+    const tokenRaw = searchParams.get('token');
+    const token = tokenRaw !== null && /^[0-9a-f]{72}$/i.test(tokenRaw) ? tokenRaw.toLowerCase() : undefined;
+    return <CoinFlowAnalyzer initialTxid={txid} initialVout={vout} initialTokenRef={token} />;
 }
 
 export default function HomePage() {
