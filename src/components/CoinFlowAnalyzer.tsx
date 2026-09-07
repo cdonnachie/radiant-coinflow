@@ -25,6 +25,7 @@ import {
     Copy,
     ExternalLink,
     Sparkles,
+    Trash2,
     X,
 } from 'lucide-react';
 import Link from 'next/link';
@@ -466,9 +467,9 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
                     )}
 
                     <div className="flex gap-2 items-center">
-                        <div className="flex rounded-md border overflow-hidden text-xs font-medium">
+                        <div className="flex h-9 items-stretch rounded border overflow-hidden text-xs font-medium">
                             <button
-                                className={`px-3 py-1.5 transition-colors ${
+                                className={`flex items-center px-3 transition-colors ${
                                     options.direction !== 'backward'
                                         ? 'bg-primary text-primary-foreground'
                                         : 'hover:bg-muted'
@@ -484,7 +485,7 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
                                 ↓ Forward
                             </button>
                             <button
-                                className={`px-3 py-1.5 transition-colors ${
+                                className={`flex items-center px-3 transition-colors ${
                                     options.direction === 'backward'
                                         ? 'bg-primary text-primary-foreground'
                                         : 'hover:bg-muted'
@@ -520,17 +521,20 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
 
                         <Button
                             variant="outline"
+                            size="icon"
                             onClick={handleClearMemory}
                             disabled={isAnalyzing}
                             title="Clear caches"
                         >
-                            🗑️
+                            <Trash2 className="h-4 w-4" />
                         </Button>
 
                         <Button
                             variant="outline"
+                            size="icon"
                             onClick={() => setShowSettings(!showSettings)}
                             disabled={isAnalyzing}
+                            title="Analysis settings"
                         >
                             <Settings className="h-4 w-4" />
                         </Button>
