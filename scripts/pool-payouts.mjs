@@ -27,7 +27,7 @@
  * REST base URL from RADIANT_REST_URL (or .env.local).
  */
 
-import { readFileSync, writeFileSync } from 'fs';
+import { existsSync, readFileSync, renameSync, unlinkSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { loadEnvLocal, ROOT } from './lib/electrum.mjs';
 
@@ -166,12 +166,16 @@ async function main() {
     const pools = Object.entries(data.mining_pools || {});
     console.log(`Pool payout analysis via ${BASE} (${pools.length} pools, up to ${MAX_HISTORY} txs each)`);
     const results = [];
+    // Incremental progress goes to a temp file; the real output is swapped in
+    // atomically at the end, so the Pools page never serves a half-built list
+    // while a scan is running.
+    const TMP = OUT ? `${OUT}.tmp` : null;
     let writeError = null;
     const write = () => {
-        if (!OUT) return;
+        if (!TMP) return;
         const sorted = [...results].sort((a, b) => b.rewardRxd - a.rewardRxd);
         try {
-            writeFileSync(OUT, JSON.stringify({
+            writeFileSync(TMP, JSON.stringify({
                 generatedAt: new Date().toISOString(),
                 windowMaxTxs: MAX_HISTORY,
                 pools: sorted,
@@ -190,12 +194,21 @@ async function main() {
         catch (e) { console.log(`\n=== ${entry.name || key} ===\n  error: ${e.message}`); continue; }
         write();
     }
-    if (OUT) {
+    if (OUT && TMP) {
         if (writeError) {
-            console.error(`\nFailed to write ${OUT}: ${writeError.message}`);
+            console.error(`\nFailed to write ${TMP}: ${writeError.message}`);
+            try { unlinkSync(TMP); } catch { /* nothing to clean up */ }
             process.exitCode = 1;
+        } else if (!existsSync(TMP)) {
+            console.log('\nNo pool summaries produced; existing output left untouched.');
         } else {
-            console.log(`\nWrote ${results.length} pool summaries to ${OUT}`);
+            try {
+                renameSync(TMP, OUT);
+                console.log(`\nWrote ${results.length} pool summaries to ${OUT}`);
+            } catch (e) {
+                console.error(`\nFailed to move ${TMP} into place: ${e.message}`);
+                process.exitCode = 1;
+            }
         }
     }
 }
