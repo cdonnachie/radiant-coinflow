@@ -73,7 +73,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                                     </a>
                                     {' • '}
                                     <a
-                                        href="https://radiantblockchain.org"
+                                        href="https://radiantcore.org"
                                         target="_blank"
                                         rel="noopener noreferrer"
                                         className="hover:text-foreground underline underline-offset-4"

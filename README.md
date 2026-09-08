@@ -1,6 +1,6 @@
 # CoinFlow Explorer — Radiant Blockchain
 
-A self-hosted web tool for tracing and visualising coin movement on the [Radiant (RXD)](https://radiantblockchain.org) blockchain. Connect it to an ElectrumX server or your own Radiant full node and explore transaction graphs, wallet clusters, and exchange/pool activity.
+A self-hosted web tool for tracing and visualising coin movement on the [Radiant (RXD)](https://radiantcore.org) blockchain. Connect it to an ElectrumX server or your own Radiant full node and explore transaction graphs, wallet clusters, and exchange/pool activity.
 
 ## Features
 

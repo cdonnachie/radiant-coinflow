@@ -40,7 +40,7 @@ export function AppHeader() {
                     ))}
                     <Button variant="ghost" size="sm" asChild className="hidden lg:inline-flex">
                         <a
-                            href="https://radiantblockchain.org"
+                            href="https://radiantcore.org"
                             target="_blank"
                             rel="noopener noreferrer"
                         >
