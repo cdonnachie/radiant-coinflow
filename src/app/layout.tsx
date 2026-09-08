@@ -66,6 +66,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                                 <p>
                                     CoinFlow Explorer •{' '}
                                     <a
+                                        href="/about"
+                                        className="hover:text-foreground underline underline-offset-4"
+                                    >
+                                        About &amp; labeling policy
+                                    </a>
+                                    {' • '}
+                                    <a
                                         href="https://radiantblockchain.org"
                                         target="_blank"
                                         rel="noopener noreferrer"

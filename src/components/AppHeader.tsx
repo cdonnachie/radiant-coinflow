@@ -11,6 +11,7 @@ const primaryLinks = [
     { href: '/', label: 'Analyze' },
     { href: '/pools', label: 'Pool activity' },
     { href: '/token', label: 'Token journey' },
+    { href: '/about', label: 'About' },
 ];
 
 export function AppHeader() {
