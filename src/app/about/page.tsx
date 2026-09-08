@@ -77,6 +77,13 @@ export default function AboutPage() {
                         </a>{' '}
                         where anyone can review how it was assembled.
                     </p>
+                    <p className="mt-3 text-sm leading-6 text-muted-foreground">
+                        Self-registered on-chain names (Wave names) are the one narrow exception:
+                        they may be shown on the specific addresses that registered them, since
+                        publishing that link is their entire purpose. CoinFlow never extends a
+                        personal name to other addresses by inference — a name applies to the
+                        address that carries it, nothing more.
+                    </p>
                 </div>
             </section>
 
