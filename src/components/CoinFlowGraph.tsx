@@ -38,7 +38,7 @@ import type { GlyphMetadata, TokenAssetInfo } from '@/types/glyph';
 import { formatAssetAmount } from '@/lib/glyph/supply';
 import { ClusteringMethod } from '@/types/coinFlow';
 import { graphlib, layout } from '@dagrejs/dagre';
-import { toPng } from 'html-to-image';
+import { toBlob, toPng } from 'html-to-image';
 import 'reactflow/dist/style.css';
 
 interface CoinFlowGraphVisualizationProps {
@@ -628,13 +628,22 @@ export const CoinFlowGraphVisualization: React.FC<CoinFlowGraphVisualizationProp
 
         // Size the export canvas to the full graph bounds so nothing is clipped.
         // Render at a legible zoom, scaled down only if a dimension would exceed
-        // the browser's canvas limits.
+        // the browser's canvas limits. WebKit (Safari, and every iOS browser)
+        // caps canvases far lower than other engines and silently returns an
+        // EMPTY canvas past the cap — so clamp both side length and total area.
+        const ua = navigator.userAgent;
+        const isWebKitOnly = /AppleWebKit/.test(ua) && !/Chrome|CriOS|Edg|OPR/.test(ua);
+        const isIOS = /iPhone|iPad|iPod/.test(ua) || (ua.includes('Mac') && navigator.maxTouchPoints > 1);
+        const constrained = isWebKitOnly || isIOS;
         const PADDING = 80; // px in graph space, around the content
-        const MAX_DIM = 10000; // safe per-side canvas cap across browsers
+        const MAX_DIM = constrained ? 4096 : 10000;
+        const MAX_AREA = constrained ? 16_000_000 : Number.POSITIVE_INFINITY;
         const nodesBounds = getNodesBounds(nodes);
         const contentWidth = nodesBounds.width + PADDING * 2;
         const contentHeight = nodesBounds.height + PADDING * 2;
-        const zoom = Math.min(2, MAX_DIM / contentWidth, MAX_DIM / contentHeight);
+        let zoom = Math.min(2, MAX_DIM / contentWidth, MAX_DIM / contentHeight);
+        const area = contentWidth * contentHeight * zoom * zoom;
+        if (area > MAX_AREA) zoom *= Math.sqrt(MAX_AREA / area);
         const imageWidth = Math.round(contentWidth * zoom);
         const imageHeight = Math.round(contentHeight * zoom);
         const x = (-nodesBounds.x + PADDING) * zoom;
@@ -644,24 +653,35 @@ export const CoinFlowGraphVisualization: React.FC<CoinFlowGraphVisualizationProp
         const addrShort = graph.startingUtxo.address.slice(0, 10);
         const baseName = `radiant-coinflow-${txShort}-${addrShort}`;
 
+        const renderOptions = {
+            backgroundColor: '#ffffff',
+            width: imageWidth,
+            height: imageHeight,
+            style: {
+                width: `${imageWidth}px`,
+                height: `${imageHeight}px`,
+                transform: `translate(${x}px, ${y}px) scale(${zoom})`,
+            },
+        };
+
         setIsExporting(true);
         try {
-            const dataUrl = await toPng(viewportEl, {
-                backgroundColor: '#ffffff',
-                width: imageWidth,
-                height: imageHeight,
-                style: {
-                    width: `${imageWidth}px`,
-                    height: `${imageHeight}px`,
-                    transform: `translate(${x}px, ${y}px) scale(${zoom})`,
-                },
-            });
+            // WebKit's first render frequently misses fonts/images — do a
+            // throwaway warm-up pass and keep the second result.
+            if (constrained) await toPng(viewportEl, renderOptions);
+
             if (format === 'png') {
+                // Blob + object URL: Safari drops large data: URLs silently.
+                const blob = await toBlob(viewportEl, renderOptions);
+                if (!blob || blob.size === 0) throw new Error('empty canvas');
+                const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.download = `${baseName}.png`;
-                a.href = dataUrl;
+                a.href = url;
                 a.click();
+                setTimeout(() => URL.revokeObjectURL(url), 30_000);
             } else {
+                const dataUrl = await toPng(viewportEl, renderOptions);
                 const { jsPDF } = await import('jspdf');
                 const pdf = new jsPDF({
                     orientation: 'landscape',
