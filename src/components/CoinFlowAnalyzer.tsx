@@ -23,6 +23,7 @@ import {
     Users,
     Settings,
     Copy,
+    Download,
     ExternalLink,
     Sparkles,
     Trash2,
@@ -261,6 +262,40 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
     }, [coinFlowService]);
 
     const formatAmount = (amount: bigint): string => formatAssetAmount(amount, asset);
+
+    const handleExportDestinationsCsv = useCallback(() => {
+        if (!result) return;
+        // Plain decimal (no digit grouping) so spreadsheets parse it as a number.
+        const plainUnits = (amount: bigint, decimals: number): string => {
+            const s = amount.toString().padStart(decimals + 1, '0');
+            if (decimals === 0) return s;
+            const whole = s.slice(0, -decimals);
+            const frac = s.slice(-decimals).replace(/0+$/, '');
+            return frac ? `${whole}.${frac}` : whole;
+        };
+        const unit = asset ? (asset.ticker ?? 'tokens') : 'RXD';
+        const decimals = asset ? (asset.decimals ?? 0) : 8;
+        const esc = (v: string) => (/[",\n]/.test(v) ? `"${v.replace(/"/g, '""')}"` : v);
+        const lines = [
+            ['address', 'label', `amount_${unit.toLowerCase()}`, 'amount_photons', 'status'].join(','),
+            ...result.summary.finalDestinations.map((d) =>
+                [
+                    d.address,
+                    d.estimatedWallet ?? '',
+                    plainUnits(d.amount, decimals),
+                    d.amount.toString(),
+                    d.isUnspent ? 'unspent' : 'spent',
+                ].map(esc).join(','),
+            ),
+        ];
+        const blob = new Blob([lines.join('\n') + '\n'], { type: 'text/csv;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.download = `radiant-coinflow-destinations-${result.graph.startingUtxo.txid.slice(0, 8)}.csv`;
+        a.href = url;
+        a.click();
+        setTimeout(() => URL.revokeObjectURL(url), 30_000);
+    }, [result, asset]);
 
     const copyToClipboard = (text: string) => {
         navigator.clipboard.writeText(text);
@@ -887,10 +922,23 @@ export const CoinFlowAnalyzer: React.FC<CoinFlowAnalyzerProps> = ({
 
                         <Card>
                             <CardHeader>
-                                <CardTitle>Final Destinations</CardTitle>
-                                <CardDescription>
-                                    Where the coins ended up (unspent or final transactions)
-                                </CardDescription>
+                                <div className="flex items-start justify-between gap-4">
+                                    <div>
+                                        <CardTitle>Final Destinations</CardTitle>
+                                        <CardDescription className="mt-1.5">
+                                            Where the coins ended up (unspent or final transactions)
+                                        </CardDescription>
+                                    </div>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={handleExportDestinationsCsv}
+                                        className="flex items-center gap-2 shrink-0"
+                                    >
+                                        <Download className="h-4 w-4" />
+                                        CSV
+                                    </Button>
+                                </div>
                             </CardHeader>
                             <CardContent>
                                 <ScrollArea className="h-64">
